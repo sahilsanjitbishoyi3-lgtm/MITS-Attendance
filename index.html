@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MITS | Smart Attendance</title>
+<link rel="icon" type="image/png" href="mits-logo.png"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar">
+  <div class="brand"><img class="brand-logo" src="mits-logo.png" alt="Majhighariani Institute of Technology and Science logo"><div class="brand-copy"><b>MITS</b><small>Attendance Portal</small></div></div>
+  <div class="side-label">WORKSPACE</div>
+  <nav>
+    <button class="nav-item active" data-view="dashboard">▦ <span>Dashboard</span></button>
+    <button class="nav-item" data-view="attendance">◷ <span>Attendance</span></button>
+    <button class="nav-item" data-view="students">♙ <span>Students</span></button>
+    <button class="nav-item" data-view="reports">▤ <span>Reports & Analytics</span></button>
+    <button class="nav-item" data-view="timetable">▦ <span>Timetable</span></button>
+    <button class="nav-item" data-view="notices">♢ <span>Notices</span></button>
+    <button class="nav-item" data-view="leave">✉ <span>Leave Requests</span></button>
+  </nav>
+  <div class="sidebar-bottom"><div class="secure">● Demo mode · Data saved in this browser</div><button id="resetDemo" class="reset">Reset demo data</button></div>
+</aside>
+<main class="main">
+<header class="topbar"><div><div class="eyebrow">MAJHIGHARIANI INSTITUTE OF TECHNOLOGY AND SCIENCE</div><h1 id="pageTitle">Dashboard</h1></div>
+<div class="topbar-right"><img class="deity-header" src="deity-header.png" alt="Deity image"><div class="top-actions"><select id="roleSelect" aria-label="Choose role"><option>Admin</option><option>Teacher</option><option>Student</option></select><div class="avatar" id="avatar">AD</div></div></div></header>
+<div class="content">
+<section id="dashboard" class="view active">
+  <div class="welcome"><div><div class="eyebrow light">WEDNESDAY, 18 NOVEMBER 2026</div><h2>Good evening, <span id="welcomeRole">Admin</span> 👋</h2><p>Here’s your college attendance overview for today.</p></div><div class="welcome-icon">✦</div></div>
+  <div class="stats">
+    <article class="stat-card"><span class="stat-icon blue">♙</span><div class="stat-label">Total students</div><strong id="totalStudents">1,248</strong><small class="positive">Across all departments</small></article>
+    <article class="stat-card"><span class="stat-icon green">✓</span><div class="stat-label">Present today</div><strong id="presentToday">1,086</strong><small class="positive" id="presentPercent">87.0% attendance</small></article>
+    <article class="stat-card"><span class="stat-icon orange">◷</span><div class="stat-label">Absent today</div><strong id="absentToday">162</strong><small>Needs follow-up</small></article>
+    <article class="stat-card"><span class="stat-icon purple">▤</span><div class="stat-label">Classes today</div><strong>32</strong><small>Across 8 departments</small></article>
+  </div>
+  <div class="grid-two">
+    <article class="panel"><div class="panel-head"><div><h3>Attendance by department</h3><p>Today's attendance percentage</p></div><span class="tag">Today</span></div><div id="departmentBars" class="bars"></div></article>
+    <article class="panel"><div class="panel-head"><div><h3>Quick actions</h3><p>Common tasks</p></div></div><div class="quick-grid"><button data-goto="attendance"><b>＋</b><span>Mark attendance</span></button><button data-goto="students"><b>♙</b><span>Add student</span></button><button data-goto="reports"><b>▤</b><span>View reports</span></button><button data-goto="notices"><b>♢</b><span>Post notice</span></button></div></article>
+  </div>
+  <article class="panel"><div class="panel-head"><div><h3>Recent attendance activity</h3><p>Latest records entered in this browser</p></div><button class="text-btn" data-goto="attendance">View all →</button></div><div class="table-wrap"><table><thead><tr><th>Student</th><th>Department</th><th>Year</th><th>Date</th><th>Status</th></tr></thead><tbody id="recentRows"></tbody></table></div></article>
+</section>
+<section id="attendance" class="view">
+ <div class="section-intro"><div><h2>Attendance register</h2><p>Record daily attendance by department, year and section.</p></div><button class="primary" id="saveAttendance">Save attendance</button></div>
+ <article class="panel filters">
+  <label>Department<select id="attDept"><option>Computer Science</option><option>Mechanical</option><option>Electrical</option><option>Civil</option><option>Electronics</option></select></label>
+  <label>Academic year<select id="attYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></label>
+  <label>Section<select id="attSection"><option>A</option><option>B</option><option>C</option></select></label>
+  <label>Date<input type="date" id="attDate" value="2026-11-18"></label>
+  <label class="search-label">Search student<input id="studentSearch" placeholder="Name or roll number"></label>
+ </article>
+ <div class="attendance-tools"><span id="rosterCount">Showing students</span><div><button class="secondary" id="markAllPresent">Mark all present</button><button class="secondary" id="markAllAbsent">Mark all absent</button></div></div>
+ <article class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Roll no.</th><th>Student name</th><th>Department</th><th>Year / Section</th><th>Attendance status</th></tr></thead><tbody id="rosterRows"></tbody></table></div></article>
+</section>
+<section id="students" class="view">
+ <div class="section-intro"><div><h2>Student directory</h2><p>Manage student records and academic details.</p></div><button class="primary" id="addStudentBtn">＋ Add student</button></div>
+ <article class="panel filters"><label class="search-label">Search<input id="directorySearch" placeholder="Search name or roll number"></label><label>Department<select id="dirDept"><option value="">All departments</option><option>Computer Science</option><option>Mechanical</option><option>Electrical</option><option>Civil</option><option>Electronics</option></select></label><label>Year<select id="dirYear"><option value="">All years</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></label></article>
+ <article class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Roll no.</th><th>Name</th><th>Department</th><th>Year</th><th>Section</th><th>Contact</th></tr></thead><tbody id="directoryRows"></tbody></table></div></article>
+ <div class="hint">Demo records are sample data. Add your real student list after connecting a secure database.</div>
+</section>
+<section id="reports" class="view">
+ <div class="section-intro"><div><h2>Reports & analytics</h2><p>Review attendance patterns and export records.</p></div><button class="primary" id="exportCsv">↓ Export CSV</button></div>
+ <article class="panel filters"><label>Department<select id="reportDept"><option value="">All departments</option><option>Computer Science</option><option>Mechanical</option><option>Electrical</option><option>Civil</option><option>Electronics</option></select></label><label>Academic year<select id="reportYear"><option value="">All years</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></label><label>From<input type="date" id="reportFrom"></label><label>To<input type="date" id="reportTo"></label></article>
+ <div class="stats report-stats"><article class="stat-card"><div class="stat-label">Recorded sessions</div><strong id="reportSessions">0</strong></article><article class="stat-card"><div class="stat-label">Present records</div><strong id="reportPresent">0</strong></article><article class="stat-card"><div class="stat-label">Average attendance</div><strong id="reportAverage">—</strong></article></div>
+ <article class="panel"><div class="panel-head"><div><h3>Student attendance summary</h3><p>Attendance percentage from saved register entries</p></div></div><div class="table-wrap"><table><thead><tr><th>Roll no.</th><th>Student</th><th>Sessions</th><th>Present</th><th>Attendance</th><th>Indicator</th></tr></thead><tbody id="reportRows"></tbody></table></div></article>
+</section>
+<section id="timetable" class="view"><div class="section-intro"><div><h2>Class timetable</h2><p>Sample weekly schedule · customize for your departments.</p></div></div><article class="panel table-panel"><div class="table-wrap"><table class="timetable"><thead><tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr></thead><tbody><tr><th>9:00–10:00</th><td>Mathematics</td><td>Programming</td><td>Physics</td><td>Electrical</td><td>English</td></tr><tr><th>10:00–11:00</th><td>Programming</td><td>Physics</td><td>Mathematics</td><td>Workshop</td><td>Programming</td></tr><tr><th>11:15–12:15</th><td>Digital Logic</td><td>English</td><td>Programming Lab</td><td>Mathematics</td><td>Physics</td></tr><tr><th>1:00–2:00</th><td>Library</td><td>Workshop</td><td>Digital Logic</td><td>Programming</td><td>Sports</td></tr></tbody></table></div></article></section>
+<section id="notices" class="view"><div class="section-intro"><div><h2>Notice board</h2><p>College announcements and academic updates.</p></div><button class="primary" id="addNoticeBtn">＋ Publish notice</button></div><div id="noticeList" class="notice-list"></div></section>
+<section id="leave" class="view"><div class="section-intro"><div><h2>Leave requests</h2><p>Submit and review student leave applications.</p></div><button class="primary" id="newLeaveBtn">＋ Apply for leave</button></div><article class="panel"><div class="table-wrap"><table><thead><tr><th>Student</th><th>From</th><th>To</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead><tbody id="leaveRows"></tbody></table></div></article></section>
+</div>
+<footer>© 2026 Majhighariani Institute of Technology and Science · Smart Campus · Attendance Portal <span>Built for MITS</span></footer>
+</main></div>
+<div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">Add record</h3><button id="closeModal" class="close">×</button></div><div id="modalBody"></div></div></div>
+<div id="toast" class="toast"></div>
+<script src="script.js"></script>
+</body></html>
