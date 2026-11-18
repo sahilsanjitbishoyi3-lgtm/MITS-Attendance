@@ -34,23 +34,25 @@ $('#exportCsv').onclick=()=>{let rows=[['Roll','Name','Department','Year','Date'
 $('#resetDemo').onclick=()=>{if(confirm('Reset all MITS demo data in this browser?')){['students','records','notices','leaves'].forEach(k=>localStorage.removeItem('mits_'+k));location.reload()}};
 renderAll();
 
-/* Opening portal role selection and demo registration */
-function enterPortal(selectedRole){$('#roleSelect').value=selectedRole;$('#welcomeRole').textContent=selectedRole;$('#avatar').textContent=selectedRole==='Admin'?'AD':selectedRole==='Teacher'?'TR':'ST';$('#portalWelcome').style.display='none';renderAll()}
-$('[data-enter]').forEach(b=>b.addEventListener('click',()=>enterPortal(b.dataset.enter)));
-$('[data-signup]').forEach(b=>b.addEventListener('click',()=>{
- const selected=b.dataset.signup;
- openModal(selected==='Admin'?'Request administrator access':selected+' registration',`<form><label>Full name<input name="name" required></label><label>Email address<input name="email" type="email" required></label>${selected==='Student'?'<label>Student roll number<input name="roll" required></label>':''}<label>Create password<input name="password" type="password" minlength="8" required></label><button class="primary">${selected==='Admin'?'Send access request':'Create demo account'}</button><p style="font-size:11px;color:#877d8b;line-height:1.5">Demo only: this form does not create a secure account or store passwords. Connect Supabase Auth before real college use.</p></form>`,f=>{toast(selected==='Admin'?'Admin access request preview only':'Registration preview only — connect Supabase for secure signup')});
-}));
 
-
-/* Reliable delegated handlers for all role entry buttons */
+/* MITS opening screen actions — one delegated click handler */
+function enterPortal(selectedRole){
+ const roleSelect=document.querySelector('#roleSelect');
+ if(!roleSelect)return;
+ roleSelect.value=selectedRole;
+ document.querySelector('#welcomeRole').textContent=selectedRole;
+ document.querySelector('#avatar').textContent=selectedRole==='Admin'?'AD':selectedRole==='Teacher'?'TR':'ST';
+ document.querySelector('#portalWelcome').style.display='none';
+ renderAll();
+}
 document.addEventListener('click',function(event){
- const loginButton=event.target.closest('[data-enter]');
- if(loginButton){event.preventDefault();enterPortal(loginButton.dataset.enter);return;}
- const signupButton=event.target.closest('[data-signup]');
- if(signupButton){event.preventDefault();const selected=signupButton.dataset.signup;
-  openModal(selected==='Admin'?'Request administrator access':selected+' registration',
-  `<form><label>Full name<input name="name" required></label><label>Email address<input name="email" type="email" required></label>${selected==='Student'?'<label>Student roll number<input name="roll" required></label>':''}<label>Create password<input name="password" type="password" minlength="8" required></label><button class="primary" type="submit">${selected==='Admin'?'Send access request':'Create demo account'}</button><p style="font-size:11px;color:#877d8b;line-height:1.5">Demo only: secure account creation is not connected yet.</p></form>`,
-  ()=>toast(selected==='Admin'?'Admin access request preview only':'Signup preview only — secure account setup comes later.'));
- }
+ const login=event.target.closest('[data-enter]');
+ if(login){event.preventDefault();enterPortal(login.dataset.enter);return;}
+ const signup=event.target.closest('[data-signup]');
+ if(!signup)return;
+ event.preventDefault();
+ const selected=signup.dataset.signup;
+ const title=selected==='Admin'?'Request administrator access':selected+' registration';
+ const form=`<form><label>Full name<input name="name" required></label><label>Email address<input name="email" type="email" required></label>${selected==='Student'?'<label>Student roll number<input name="roll" required></label>':''}<label>Create password<input name="password" type="password" minlength="8" required></label><button class="primary" type="submit">${selected==='Admin'?'Send access request':'Create demo account'}</button><p style="font-size:11px;color:#877d8b;line-height:1.5">Demo only: this does not create a secure account. Supabase authentication will be connected later.</p></form>`;
+ openModal(title,form,()=>toast(selected==='Admin'?'Admin access request preview only':'Signup preview only — secure account setup comes later.'));
 });
