@@ -41,3 +41,16 @@ $('[data-signup]').forEach(b=>b.addEventListener('click',()=>{
  const selected=b.dataset.signup;
  openModal(selected==='Admin'?'Request administrator access':selected+' registration',`<form><label>Full name<input name="name" required></label><label>Email address<input name="email" type="email" required></label>${selected==='Student'?'<label>Student roll number<input name="roll" required></label>':''}<label>Create password<input name="password" type="password" minlength="8" required></label><button class="primary">${selected==='Admin'?'Send access request':'Create demo account'}</button><p style="font-size:11px;color:#877d8b;line-height:1.5">Demo only: this form does not create a secure account or store passwords. Connect Supabase Auth before real college use.</p></form>`,f=>{toast(selected==='Admin'?'Admin access request preview only':'Registration preview only — connect Supabase for secure signup')});
 }));
+
+
+/* Reliable delegated handlers for all role entry buttons */
+document.addEventListener('click',function(event){
+ const loginButton=event.target.closest('[data-enter]');
+ if(loginButton){event.preventDefault();enterPortal(loginButton.dataset.enter);return;}
+ const signupButton=event.target.closest('[data-signup]');
+ if(signupButton){event.preventDefault();const selected=signupButton.dataset.signup;
+  openModal(selected==='Admin'?'Request administrator access':selected+' registration',
+  `<form><label>Full name<input name="name" required></label><label>Email address<input name="email" type="email" required></label>${selected==='Student'?'<label>Student roll number<input name="roll" required></label>':''}<label>Create password<input name="password" type="password" minlength="8" required></label><button class="primary" type="submit">${selected==='Admin'?'Send access request':'Create demo account'}</button><p style="font-size:11px;color:#877d8b;line-height:1.5">Demo only: secure account creation is not connected yet.</p></form>`,
+  ()=>toast(selected==='Admin'?'Admin access request preview only':'Signup preview only — secure account setup comes later.'));
+ }
+});
