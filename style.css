@@ -162,3 +162,86 @@ tbody tr:hover td{background:#f7faf3}
 footer{border-color:#e3ebe3;color:#849388;background:#f2f5ef}
 @media(max-width:1000px){.sidebar{width:220px}.content{padding:23px}}
 @media(max-width:700px){.sidebar{width:100%;padding:12px;background:#0c3028}.brand{padding:0 5px 12px}.brand-logo{width:48px;height:48px;flex-basis:48px}.topbar{padding:0 14px;height:76px}.topbar h1{font-size:22px}.content{padding:18px 14px 28px}.welcome{padding:22px;border-radius:17px}.welcome h2{font-size:22px}.welcome:after{right:-80px}.stats{gap:10px}.stat-card{border-radius:14px;padding:14px;min-height:116px}.panel{padding:17px;border-radius:15px}.section-intro h2{font-size:19px}.deity-header{width:42px;height:42px}.topbar-right{gap:8px}.top-actions{gap:7px}}
+
+
+/* Refinement: larger typography, more prominent images, plum-teal-coral palette */
+:root{--navy:#302044;--blue:#287f83;--ink:#292239;--muted:#777184;--line:#e9e2eb;--bg:#f7f3f8;--green:#287f70;--gold:#f0a58b;--gold-light:#fbe7df}
+body{background:var(--bg);color:var(--ink);font-size:15px}
+.app-shell{background:radial-gradient(ellipse at 88% 0%,#f0e3f1 0,transparent 34%),var(--bg)}
+.sidebar{background:linear-gradient(165deg,#241831 0%,#39254c 58%,#203e49 100%)}
+.brand-logo{width:68px;height:68px;flex:0 0 68px;border-radius:18px;border:2px solid #f0a58b;box-shadow:0 8px 22px #10091d55}
+.brand-copy b{font-size:21px}
+.brand-copy small{font-size:10px}
+.side-label{font-size:10px}
+.nav-item{padding:14px 13px;gap:14px}
+.nav-item span{font-size:14px}
+.nav-item.active{background:linear-gradient(100deg,#f0a58b,#f5c6a7);color:#302044}
+.topbar{background:#fffaff;border-color:#e9e2eb}
+.eyebrow{font-size:10px;color:#8a668e}
+.topbar h1{font-size:29px;color:#302044}
+.deity-header{width:76px;height:76px;border:3px solid #f0a58b;border-radius:20px;box-shadow:0 8px 22px #30204425}
+.top-actions select{font-size:13px;border-color:#e7dce9;background:#fffaff}
+.avatar{width:42px;height:42px;background:#eee1f1;color:#573c69;border-color:#e0cde4;font-size:13px}
+.content{padding-top:35px}
+.welcome{background:linear-gradient(115deg,#302044 0%,#55406a 57%,#287f83 100%);border:1px solid #5b496b}
+.welcome h2{font-size:31px}
+.welcome p{font-size:15px}
+.light{color:#f4c9b8}
+.welcome-icon{color:#f4b49d}
+.stat-card{background:#fffaff;border-color:#e9e2eb;padding:22px;min-height:145px}
+.stat-icon{width:40px;height:40px;border-radius:13px;font-size:17px}
+.blue{background:#e4f1f2;color:#287f83}.green{background:#e7f4ed;color:#287f70}.orange{background:#fff0e9;color:#c66f53}.purple{background:#f1e8f4;color:#805b91}
+.stat-label{font-size:13px;color:#777184}
+.stat-card strong{font-size:31px;color:#302044}
+.stat-card small{font-size:12px}
+.panel{background:#fffaff;border-color:#e9e2eb;padding:23px 24px}
+.panel h3{font-size:17px;color:#302044}
+.panel-head p,.section-intro p{font-size:13px}
+.section-intro h2{font-size:25px;color:#302044}
+.tag{background:#fbe7df;color:#9d5b4e;font-size:11px}
+.bar-row{font-size:13px}
+.bar-track{height:10px;background:#f0e8f1}
+.bar-fill{background:linear-gradient(90deg,#287f83,#f0a58b)}
+.quick-grid button{font-size:13px;padding:15px;border-color:#e9e2eb;background:#fffaff}
+.quick-grid b{font-size:22px;color:#287f83}
+th{font-size:11px;color:#76667d;background:#f4edf5}
+td{font-size:13px;color:#4e4657}
+.status{font-size:11px;padding:6px 10px}
+.present{background:#e5f4ec;color:#287f70}.absent{background:#ffebe8;color:#bd5c57}.late{background:#fff0e5;color:#a76b37}
+.primary,.secondary{font-size:13px;padding:11px 17px;border-radius:11px}
+.primary{background:linear-gradient(120deg,#287f83,#315d78);border-color:#287f83}
+.primary:hover{background:linear-gradient(120deg,#206d70,#294d66)}
+.secondary{background:#fbe7df;color:#965b51;border-color:#f2d6cc}
+.text-btn{font-size:13px;color:#287f83}
+.filters{background:#fffaff}
+.filters label{font-size:12px}
+.filters input,.filters select,.modal input,.modal select,.modal textarea{font-size:13px;padding:10px 12px;border-color:#e5dce8;background:#fff}
+.attendance-tools{font-size:13px}
+.attendance-tools button{font-size:12px}
+.attendance-select{font-size:12px;border-color:#e5dce8}
+.hint{font-size:12px}
+.notice{background:#fffaff;border-color:#e9e2eb}
+.notice h3{font-size:17px;color:#302044}
+.notice p{font-size:14px;line-height:1.7}
+.notice small{font-size:11px}
+.modal{background:#fffaff;border-color:#eadfea}
+.modal-head h3{font-size:23px}
+.modal label{font-size:13px}
+.close{font-size:22px}
+footer{font-size:11px;background:#f7f3f8;border-color:#e9e2eb}
+@media(max-width:1000px){.brand-logo{width:60px;height:60px;flex-basis:60px}.content{padding:24px}}
+@media(max-width:700px){
+ .brand-logo{width:54px;height:54px;flex-basis:54px}
+ .brand-copy b{font-size:18px}.brand-copy small{font-size:9px}
+ .nav-item{padding:11px 12px}.nav-item span{font-size:12px}
+ .topbar{height:80px;padding:0 12px}.topbar h1{font-size:23px}
+ .deity-header{width:54px;height:54px;border-radius:15px}
+ .top-actions select{font-size:11px;padding:7px 5px}
+ .content{padding:19px 13px 28px}
+ .welcome{padding:22px}.welcome h2{font-size:24px}.welcome p{font-size:13px}
+ .stat-card{padding:15px;min-height:125px}.stat-card strong{font-size:27px}.stat-label{font-size:12px}.stat-card small{font-size:11px}
+ .panel{padding:17px}.panel h3{font-size:16px}
+ .section-intro h2{font-size:21px}.section-intro p{font-size:12px}
+ th{font-size:10px}td{font-size:12px}
+ .quick-grid button{font-size:12px;padding:12px}
+}
