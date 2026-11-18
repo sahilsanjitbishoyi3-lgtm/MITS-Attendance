@@ -86,3 +86,79 @@ footer{border-color:#e8e3d9;color:#9b9588;background:#f7f6f2}
   .top-actions select{max-width:94px;padding:7px 5px;font-size:11px}
   .content{padding:20px 14px 28px}
 }
+
+
+/* MITS fresh redesign: Emerald & Ivory campus theme */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+:root{--navy:#123c32;--blue:#16745d;--ink:#172b25;--muted:#78877f;--line:#e4ebe5;--bg:#f2f5ef;--green:#16845f;--gold:#c8e66a;--gold-light:#eff7d9}
+*{scrollbar-color:#b8c9bc transparent}
+body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif}
+.app-shell{background:radial-gradient(ellipse at 88% 0%,#e3eddc 0,transparent 33%),var(--bg)}
+.sidebar{width:258px;background:linear-gradient(165deg,#0c3028 0%,#124638 60%,#0d352d 100%);color:#e1eee5;padding:26px 16px;box-shadow:8px 0 32px #103d3010}
+.brand{padding:0 8px 36px;gap:12px}
+.brand-logo{background:#fff;border:2px solid #d5ed9c;border-radius:16px;box-shadow:0 8px 22px #071e1840}
+.brand-copy b{font:800 19px 'Space Grotesk',sans-serif;letter-spacing:1.7px}
+.brand-copy small{color:#b7d6c3;letter-spacing:1px}
+.side-label{color:#8db4a0;letter-spacing:2px;font-size:9px}
+.nav-item{color:#b7d0c3;border-radius:12px;padding:13px 12px;transition:background .2s,color .2s,transform .2s}
+.nav-item:hover{background:#ffffff12;color:#fff;transform:translateX(2px)}
+.nav-item.active{background:#d5ed9c;color:#173c30;box-shadow:none;font-weight:800}
+.nav-item.active span{font-weight:800}
+.secure{color:#a4c7b3}
+.reset{color:#d5ed9c}
+.topbar{height:96px;padding:0 40px;background:#fbfcf8;border-bottom:1px solid #e4ebe5}
+.eyebrow{color:#6e8a79;font-size:9px;letter-spacing:1.8px}
+.topbar h1{font:700 27px 'Space Grotesk',sans-serif;color:#173b30}
+.top-actions select{border:1px solid #dce7dd;background:#f7faf5;border-radius:12px;padding:10px 13px;color:#315347}
+.avatar{background:#dff0c3;color:#28513d;border:1px solid #cfe4ad}
+.deity-header{border:3px solid #d5ed9c;border-radius:18px;box-shadow:0 7px 18px #123c3220}
+.content{padding:32px 40px 42px;max-width:1600px}
+.welcome{background:linear-gradient(115deg,#10392f 0%,#17614b 60%,#248267 100%);border:0;border-radius:23px;padding:32px 35px;box-shadow:0 16px 36px #164d3b20;position:relative}
+.welcome:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 85% 20%,#d5ed9c2b 0 2px,transparent 3px);background-size:25px 25px;mask-image:linear-gradient(90deg,transparent,black);pointer-events:none}
+.welcome:after{content:"";position:absolute;right:85px;top:-105px;width:280px;height:280px;border:1px solid #d5ed9c45;border-radius:50%;box-shadow:0 0 0 30px #d5ed9c0b,0 0 0 62px #d5ed9c09;pointer-events:none}
+.welcome h2{font:700 29px 'Space Grotesk',sans-serif;letter-spacing:-.7px}
+.welcome p{color:#d5e9dc}
+.light{color:#c8e5a0}
+.welcome-icon{color:#d5ed9c;z-index:1}
+.stats{gap:17px}
+.stat-card,.panel{border:1px solid #e3ebe3;border-radius:18px;box-shadow:0 7px 22px #1b46330a}
+.stat-card{background:#fcfdf9;padding:20px;min-height:137px;transition:transform .2s,box-shadow .2s}
+.stat-card:hover{transform:translateY(-4px);box-shadow:0 15px 30px #1b463318}
+.stat-icon{width:36px;height:36px;border-radius:12px}
+.blue{background:#e4f1e9;color:#16745d}.green{background:#e8f4d7;color:#4f7b2f}.orange{background:#fff1dc;color:#b7792c}.purple{background:#eeeaf7;color:#7762a4}
+.stat-card strong{font:800 29px 'Space Grotesk',sans-serif;color:#173b30}
+.stat-label{font-size:11px;color:#77877d;letter-spacing:.3px}
+.grid-two{gap:19px}
+.panel{background:#fcfdf9;padding:22px 23px}
+.panel h3{font:700 15px 'Space Grotesk',sans-serif;color:#1c3d31}
+.panel-head p,.section-intro p{color:#819087}
+.tag{background:#edf5dc;color:#52742d;border-radius:8px}
+.bar-track{height:9px;background:#edf2eb;border-radius:12px}
+.bar-fill{background:linear-gradient(90deg,#1c765c,#b4d95c);border-radius:12px}
+.quick-grid button{border:1px solid #e3ebe3;background:#f8faf5;border-radius:14px;padding:14px;transition:.2s}
+.quick-grid button:hover{border-color:#a9cb79;background:#f0f7e6;transform:translateY(-2px)}
+.quick-grid b{color:#2d805d}
+th{background:#f1f5ed;color:#74877a;border-bottom:1px solid #e3ebe3;font-size:10px;letter-spacing:.4px;text-transform:uppercase}
+td{color:#465c50;border-bottom:1px solid #edf1eb}
+tbody tr:hover td{background:#f7faf3}
+.status{border-radius:8px;padding:6px 9px}
+.present{background:#e4f4d9;color:#3e762e}.absent{background:#ffebe6;color:#bd5548}.late{background:#fff2d9;color:#a87525}
+.section-intro h2{font:700 23px 'Space Grotesk',sans-serif;color:#173b30}
+.primary{background:#17634d;color:#fafff7;border:1px solid #17634d;border-radius:11px;box-shadow:0 5px 13px #17634d20}
+.primary:hover{background:#0f4c3b}
+.secondary{background:#edf5df;color:#416c34;border:1px solid #dfebca;border-radius:10px}
+.text-btn{color:#20745a}
+.filters{background:#fcfdf9}
+.filters input,.filters select,.modal input,.modal select,.modal textarea{border:1px solid #dfe8df;background:#f9fbf7;border-radius:10px;color:#304c3e}
+.filters input:focus,.filters select:focus,.modal input:focus,.modal select:focus,.modal textarea:focus{outline:2px solid #b7d98a;outline-offset:1px}
+.attendance-select{border:1px solid #dfe8df;border-radius:8px;background:#f9fbf7}
+.notice{background:#fcfdf9;border:1px solid #e3ebe3;border-radius:16px;box-shadow:0 6px 18px #1b46330a}
+.notice h3{font:700 16px 'Space Grotesk',sans-serif;color:#1c3d31}
+.modal-backdrop{background:#0b2822a6;backdrop-filter:blur(5px)}
+.modal{border:1px solid #e2ebdf;border-radius:20px;background:#fcfdf9;box-shadow:0 24px 80px #071e1840}
+.modal-head h3{font:700 21px 'Space Grotesk',sans-serif;color:#173b30}
+.close{background:#edf3e9;color:#41634e;border-radius:10px}
+.toast{background:#10392f;border:1px solid #d5ed9c;color:#f7ffed;border-radius:12px}
+footer{border-color:#e3ebe3;color:#849388;background:#f2f5ef}
+@media(max-width:1000px){.sidebar{width:220px}.content{padding:23px}}
+@media(max-width:700px){.sidebar{width:100%;padding:12px;background:#0c3028}.brand{padding:0 5px 12px}.brand-logo{width:48px;height:48px;flex-basis:48px}.topbar{padding:0 14px;height:76px}.topbar h1{font-size:22px}.content{padding:18px 14px 28px}.welcome{padding:22px;border-radius:17px}.welcome h2{font-size:22px}.welcome:after{right:-80px}.stats{gap:10px}.stat-card{border-radius:14px;padding:14px;min-height:116px}.panel{padding:17px;border-radius:15px}.section-intro h2{font-size:19px}.deity-header{width:42px;height:42px}.topbar-right{gap:8px}.top-actions{gap:7px}}
