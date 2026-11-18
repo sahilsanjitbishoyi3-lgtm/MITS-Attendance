@@ -33,3 +33,11 @@ $('#newLeaveBtn').onclick=()=>openModal('Apply for leave',`<form><label>Student 
 $('#exportCsv').onclick=()=>{let rows=[['Roll','Name','Department','Year','Date','Status'],...records.map(r=>[r.roll,r.name,r.dept,r.year,r.date,r.status])];let csv=rows.map(r=>r.map(x=>'"'+String(x??'').replaceAll('"','""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='MITS-attendance-report.csv';a.click();URL.revokeObjectURL(a.href)};
 $('#resetDemo').onclick=()=>{if(confirm('Reset all MITS demo data in this browser?')){['students','records','notices','leaves'].forEach(k=>localStorage.removeItem('mits_'+k));location.reload()}};
 renderAll();
+
+/* Opening portal role selection and demo registration */
+function enterPortal(selectedRole){$('#roleSelect').value=selectedRole;$('#welcomeRole').textContent=selectedRole;$('#avatar').textContent=selectedRole==='Admin'?'AD':selectedRole==='Teacher'?'TR':'ST';$('#portalWelcome').style.display='none';renderAll()}
+$('[data-enter]').forEach(b=>b.addEventListener('click',()=>enterPortal(b.dataset.enter)));
+$('[data-signup]').forEach(b=>b.addEventListener('click',()=>{
+ const selected=b.dataset.signup;
+ openModal(selected==='Admin'?'Request administrator access':selected+' registration',`<form><label>Full name<input name="name" required></label><label>Email address<input name="email" type="email" required></label>${selected==='Student'?'<label>Student roll number<input name="roll" required></label>':''}<label>Create password<input name="password" type="password" minlength="8" required></label><button class="primary">${selected==='Admin'?'Send access request':'Create demo account'}</button><p style="font-size:11px;color:#877d8b;line-height:1.5">Demo only: this form does not create a secure account or store passwords. Connect Supabase Auth before real college use.</p></form>`,f=>{toast(selected==='Admin'?'Admin access request preview only':'Registration preview only — connect Supabase for secure signup')});
+}));
