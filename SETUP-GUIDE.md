@@ -35,7 +35,7 @@ The included `supabase_schema.sql` is a starter database schema and row-level-se
 8. Choose branch **main** and folder **/(root)**, then click **Save**.
 9. Wait for GitHub Pages to publish. Open the Pages URL shown in Settings → Pages.
 
-## Step-by-step: prepare the shared database
+## Secure role permissions — new migration\n\nA stricter role-based policy migration is available as `supabase_role_security_v2.sql` on branch `feature/secure-role-access`. Test it in a separate Supabase project after the starter schema. It adds explicit teacher-to-subject assignments and scopes teacher access to assigned cohorts, while students can read only their own attendance. Do not merge to the production branch or enter real student data until the policies have been tested with separate student, teacher and admin accounts. The current website frontend is still a prototype; this SQL migration alone does not create a working login UI or connect the frontend.\n\n## Step-by-step: prepare the shared database
 1. Create a Supabase project under an account controlled by the institution.
 2. Open **SQL Editor → New query**.
 3. Copy the contents of `supabase_schema.sql`, review it, and run it.
