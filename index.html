@@ -124,6 +124,9 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 </main></div>
 <div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">Add record</h3><button id="closeModal" class="close">×</button></div><div id="modalBody"></div></div></div>
 <div id="toast" class="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-client.js"></script>
 <script src="script.js"></script>
 <script>
 /* Independent welcome-screen controls: keeps login/signup usable even if dashboard JS has an error. */
@@ -151,20 +154,47 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
     modal.style.zIndex = '10020';
     modal.classList.add('open');
     const form = document.getElementById('welcomeAuthForm');
-    form.addEventListener('submit', function (event) {
+    form.addEventListener('submit', async function (event) {
       event.preventDefault();
+      const submit = form.querySelector('button[type="submit"]');
       if (isSignup) {
-        alert(role === 'Admin' ? 'Admin access request preview only. No administrator account was created.' : 'Signup preview only. No account was created yet.');
-        modal.classList.remove('open');
+        alert(role === 'Admin' ? 'Admin accounts are created only by an authorized MITS administrator.' : 'Self-registration is disabled. Ask the MITS administrator to create your account.');
         return;
       }
-      if (roleSelect) roleSelect.value = role;
-      const welcomeRole = document.getElementById('welcomeRole');
-      const avatar = document.getElementById('avatar');
-      if (welcomeRole) welcomeRole.textContent = role;
-      if (avatar) avatar.textContent = role === 'Admin' ? 'AD' : role === 'Teacher' ? 'TR' : 'ST';
-      modal.classList.remove('open');
-      if (welcome) welcome.style.display = 'none';
+      if (!window.MITSAuth || !window.MITSAuth.ready) {
+        alert('Secure login is not configured yet. Please contact the MITS administrator.');
+        return;
+      }
+      const identity = form.elements.identity.value.trim();
+      const password = form.elements.password.value;
+      if (!identity.includes('@')) {
+        alert('Please enter the email address registered with your MITS account.');
+        return;
+      }
+      submit.disabled = true;
+      submit.textContent = 'Signing in…';
+      try {
+        const result = await window.MITSAuth.signIn(identity, password);
+        const actualRole = result.profile.role;
+        if (actualRole !== role.toLowerCase()) {
+          await window.MITSAuth.signOut();
+          throw new Error('This account is registered as ' + actualRole + ', not ' + role.toLowerCase() + '. Choose the correct login.');
+        }
+        if (roleSelect) roleSelect.value = role;
+        const welcomeRole = document.getElementById('welcomeRole');
+        const avatar = document.getElementById('avatar');
+        if (welcomeRole) welcomeRole.textContent = result.profile.full_name || role;
+        if (avatar) avatar.textContent = role === 'Admin' ? 'AD' : role === 'Teacher' ? 'TR' : 'ST';
+        modal.classList.remove('open');
+        if (welcome) welcome.style.display = 'none';
+        window.MITS_CURRENT_PROFILE = result.profile;
+        window.dispatchEvent(new CustomEvent('mits:authenticated', { detail: result.profile }));
+      } catch (error) {
+        alert(error.message || 'Unable to sign in. Check your details and try again.');
+      } finally {
+        submit.disabled = false;
+        submit.textContent = 'Continue to secure portal';
+      }
     });
   }
   document.addEventListener('click', function (event) {
