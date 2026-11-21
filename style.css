@@ -273,3 +273,7 @@ footer{font-size:11px;background:#f7f3f8;border-color:#e9e2eb}
 .admin-request{background:linear-gradient(110deg,#6b547e,#9b7188)}
 .portal-note{display:block;text-align:center;color:#91889a;font-size:11px;margin-top:22px}
 @media(max-width:700px){.portal-welcome{padding:14px 10px;align-items:flex-start}.welcome-card{padding:19px;border-radius:22px}.welcome-brand>img:first-child{width:62px;height:62px}.welcome-deity{width:65px;height:65px}.welcome-brand h1{font-size:21px}.welcome-brand p{font-size:11px}.welcome-copy{padding:24px 5px 19px}.welcome-copy p{font-size:13px}.role-cards{grid-template-columns:1fr;gap:11px}.role-cards article{padding:16px}.role-cards p{min-height:0;margin-bottom:12px}.role-symbol{width:43px;height:43px}.role-cards h3{margin:10px 0 4px}}
+
+
+/* Critical: enforce the HTML hidden attribute over component display rules. */
+[hidden]{display:none!important}
