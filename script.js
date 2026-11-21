@@ -143,42 +143,32 @@ document.addEventListener('click',function(event){
 })();
 
 
-/* Strictly separate Student, Teacher and Admin workspaces (demo mode). */
+/* Role-specific navigation visibility. Use inline !important because .nav-item CSS sets display:flex. */
 (function(){
- const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
- const permissions={
-  Student:{views:["dashboard","checkin","timetable","notices","leave"],quick:["checkin","notices","leave","timetable"]},
-  Teacher:{views:["dashboard","attendance","teacherCode","students","reports","leave"],quick:["teacherCode","attendance","students","reports","leave"]},
-  Admin:{views:["dashboard","attendance","teacherCode","checkin","students","reports","timetable","notices","leave"],quick:["attendance","teacherCode","checkin","students","reports","notices","leave","timetable"]}
+ const rules={
+  Student:["dashboard","checkin","timetable","notices","leave"],
+  Teacher:["dashboard","attendance","teacherCode","students","reports"],
+  Admin:["dashboard","attendance","teacherCode","checkin","students","reports","timetable","notices","leave"]
  };
- function applyRole(){
-  const current=$("#roleSelect")?.value||"Student",allowed=permissions[current]||permissions.Student;
-  $$(".nav-item").forEach(item=>{item.hidden=!allowed.views.includes(item.dataset.view)});
-  $$("[data-goto]").forEach(item=>{item.hidden=!allowed.quick.includes(item.dataset.goto)});
-  const dashboard=$("#dashboard");
-  if(dashboard){
-   const stats=dashboard.querySelector(".stats"),analytics=dashboard.querySelector(".grid-two"),activity=dashboard.querySelector(":scope > .panel");
-   if(current==="Student"){
-    if(stats)stats.hidden=true;if(analytics)analytics.hidden=true;if(activity)activity.hidden=true;
-    let home=$("#studentDashboardHome");
-    if(!home){
-     home=document.createElement("section");home.id="studentDashboardHome";
-     home.innerHTML='<article class="panel" style="margin-top:18px"><div class="panel-head"><div><h3>Student services</h3><p>Your attendance and campus information.</p></div><span class="tag">STUDENT</span></div><div class="quick-grid"><button data-goto="checkin"><b>✓</b><span>Submit attendance with teacher code</span></button><button data-goto="notices"><b>♢</b><span>View college notices</span></button><button data-goto="leave"><b>✉</b><span>Apply for leave</span></button><button data-goto="timetable"><b>▦</b><span>View timetable</span></button></div></article>';
-     dashboard.appendChild(home);
-     home.querySelectorAll("[data-goto]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.goto)));
-    }
-    home.hidden=false;
-   }else{
-    if(stats)stats.hidden=false;if(analytics)analytics.hidden=false;if(activity)activity.hidden=false;
-    const home=$("#studentDashboardHome");if(home)home.hidden=true;
-   }
+ function apply(){
+  const role=document.getElementById('roleSelect')?.value||'Student';
+  const allowed=rules[role]||rules.Student;
+  document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
+   el.style.setProperty('display',allowed.includes(el.dataset.view)?'flex':'none','important');
+  });
+  document.querySelectorAll('[data-goto]').forEach(el=>{
+   const key=el.dataset.goto;
+   const show=allowed.includes(key);
+   el.style.setProperty('display',show?'':'none','important');
+  });
+  const active=document.querySelector('.view.active');
+  if(active&&!allowed.includes(active.id)){
+   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='dashboard'));
+   document.querySelectorAll('.nav-item').forEach(v=>v.classList.toggle('active',v.dataset.view==='dashboard'));
+   const title=document.getElementById('pageTitle');if(title)title.textContent='Dashboard';
   }
-  const active=$(".view.active");
-  if(active&&!allowed.views.includes(active.id))navigate("dashboard");
-  // Hide dashboard quick-action links not assigned to the selected role.
-  $$("[data-goto]").forEach(item=>{if(!item.closest("#studentDashboardHome"))item.hidden=!allowed.quick.includes(item.dataset.goto)});
  }
- const select=$("#roleSelect");
- if(select){select.addEventListener("change",applyRole);applyRole();}
- window.mitsApplyRolePermissions=applyRole;
+ const select=document.getElementById('roleSelect');
+ if(select){select.addEventListener('change',apply);apply();}
+ window.mitsApplyRolePermissions=apply;
 })();
