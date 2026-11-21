@@ -157,7 +157,7 @@ document.addEventListener('click',function(event){
   const picker=document.getElementById('roleSelect');
   const currentRole=picker?picker.value:'Student';
   const views=allowed[currentRole]||allowed.Student;
-  document.querySelectorAll('.sidebar .nav-item[data-view]').forEach(node=>{
+  document.querySelectorAll('.nav-item[data-view]').forEach(node=>{
    node.style.setProperty('display',views.includes(node.dataset.view)?'flex':'none','important');
   });
   document.querySelectorAll('.quick-grid [data-goto], [data-goto].text-btn').forEach(node=>{
@@ -167,6 +167,7 @@ document.addEventListener('click',function(event){
   if(noticeButton)noticeButton.style.display=(currentRole==="Teacher"||currentRole==="Admin")?"":"none";
   const active=document.querySelector('.view.active');
   if(active&&!views.includes(active.id))navigate('dashboard');
+  document.querySelectorAll('.view').forEach(view=>{if(!views.includes(view.id))view.classList.remove('active')});
   const dashboard=document.getElementById('dashboard');
   if(dashboard){
    const stats=dashboard.querySelector('.stats');
