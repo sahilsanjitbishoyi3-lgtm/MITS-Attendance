@@ -45,8 +45,35 @@ function directory(){let q=$('#directorySearch').value.toLowerCase(),d=$('#dirDe
 function reports(){let d=$('#reportDept').value,y=$('#reportYear').value,from=$('#reportFrom').value,to=$('#reportTo').value;let rs=records.filter(r=>(!d||r.dept===d)&&(!y||r.year===y)&&(!from||r.date>=from)&&(!to||r.date<=to));let present=rs.filter(r=>r.status==='Present').length;$('#reportSessions').textContent=rs.length;$('#reportPresent').textContent=present;$('#reportAverage').textContent=rs.length?Math.round(present/rs.length*100)+'%':'—';let grouped={};rs.forEach(r=>{grouped[r.roll]??={...r,n:0,p:0};grouped[r.roll].n++;if(r.status==='Present'||r.status==='Late')grouped[r.roll].p++});$('#reportRows').innerHTML=Object.values(grouped).map(r=>{let p=Math.round(r.p/r.n*100);return `<tr><td>${r.roll}</td><td>${esc(r.name)}</td><td>${r.n}</td><td>${r.p}</td><td><b>${p}%</b></td><td>${badge(p>=75?'Present':'Absent')}</td></tr>`}).join('')||'<tr><td colspan="6">No attendance records yet. Save a register to generate reports.</td></tr>'}
 ['#reportDept','#reportYear','#reportFrom','#reportTo'].forEach(s=>$(s).addEventListener('input',reports));
 function noticeRender(){$('#noticeList').innerHTML=notices.slice().reverse().map(n=>`<article class="notice"><h3>${esc(n.title)}</h3><p>${esc(n.body)}</p><small>Published · ${n.date}</small></article>`).join('')}
-function leaveRender(){$('#leaveRows').innerHTML=leaves.map((l,i)=>`<tr><td>${esc(l.student)}</td><td>${l.from}</td><td>${l.to}</td><td>${esc(l.reason)}</td><td>${badge(l.status)}</td><td>${role()==='Admin'||role()==='Teacher'?`<button class="text-btn" onclick="updateLeave(${i},'Approved')">Approve</button> <button class="text-btn" onclick="updateLeave(${i},'Rejected')">Reject</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="6">No leave requests submitted.</td></tr>'}
-window.updateLeave=(i,s)=>{leaves[i].status=s;save();leaveRender();toast('Leave request '+s.toLowerCase())};
+function leaveRender(){
+ const body=$('#leaveRows');if(!body)return;
+ const canReview=role()==='Admin'||role()==='Teacher';
+ body.innerHTML=leaves.map((l,i)=>{
+  const status=String(l.status||'Pending');
+  const action=canReview&&status==='Pending'
+   ? '<button type="button" class="text-btn" data-leave-action="Approved" data-leave-index="'+i+'">Approve</button> <button type="button" class="text-btn" data-leave-action="Rejected" data-leave-index="'+i+'">Reject</button>'
+   : (canReview?'<span class="muted">Completed</span>':'<span class="muted">View only</span>');
+  return '<tr><td>'+esc(l.student)+'</td><td>'+esc(l.from)+'</td><td>'+esc(l.to)+'</td><td>'+esc(l.reason)+'</td><td>'+badge(status)+'</td><td>'+action+'</td></tr>';
+ }).join('')||'<tr><td colspan="6">No leave requests submitted.</td></tr>';
+}
+bodyLeaveHandler();
+function bodyLeaveHandler(){
+ const body=$('#leaveRows');if(!body||body.dataset.actionsBound)return;
+ body.dataset.actionsBound='1';
+ body.addEventListener('click',e=>{
+  const btn=e.target.closest('[data-leave-action]');if(!btn)return;
+  if(role()!=='Admin'&&role()!=='Teacher'){toast('Only teachers and admins can review leave requests');return}
+  const index=Number(btn.dataset.leaveIndex),status=btn.dataset.leaveAction;
+  if(!Number.isInteger(index)||!leaves[index]||leaves[index].status!=='Pending')return;
+  leaves[index].status=status;save();leaveRender();toast('Leave request '+status.toLowerCase());
+ });
+}
+window.updateLeave=(i,s)=>{
+ if(role()!=='Admin'&&role()!=='Teacher'){toast('Only teachers and admins can review leave requests');return}
+ if(!leaves[i]||leaves[i].status!=='Pending')return;
+ leaves[i].status=s;save();leaveRender();toast('Leave request '+s.toLowerCase());
+};
+
 function studentReportRender(){
  const out=$('#studentReportResult');if(!out)return;
  const roll=($('#myReportRoll')?.value||'').trim().toUpperCase();
