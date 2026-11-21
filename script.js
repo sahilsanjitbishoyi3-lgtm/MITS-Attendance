@@ -75,7 +75,7 @@ document.addEventListener('click',function(event){
    e.preventDefault();
    const subject=$id('codeSubject').value.trim();if(!subject)return;
    const code=String(Math.floor(100000+Math.random()*900000));
-   const s={code,subject,de​​pt:$id('codeDept').value,year:$id('codeYear').value,section:$id('codeSection').value,date:today(),expires:Date.now()+2*60*60*1000};
+   const s={code,subject,dept:$id('codeDept').value,year:$id('codeYear').value,section:$id('codeSection').value,date:today(),expires:Date.now()+2*60*60*1000};
    localStorage.setItem('mits_active_attendance_code',JSON.stringify(s));showCode();toast('Attendance code generated');
  });
  const check=$id('studentCodeForm');
