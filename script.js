@@ -48,7 +48,25 @@ function applyRolePermissions(){
 }
 $$('.nav-item').forEach(b=>b.onclick=()=>navigate(b.dataset.view));$$('[data-goto]').forEach(b=>b.onclick=()=>navigate(b.dataset.goto));
 $('#roleSelect').onchange=()=>{renderAll();applyRolePermissions();toast('Viewing '+role()+' demo workspace')};
-function stat(){let today=records.filter(r=>r.date==='2026-11-18'),present=today.filter(r=>r.status==='Present').length;$('#totalStudents').textContent=students.length.toLocaleString();$('#presentToday').textContent=present||Math.round(students.length*.87);$('#absentToday').textContent=today.length?today.length-present:Math.round(students.length*.13);$('#presentPercent').textContent=(today.length?Math.round(present/today.length*100):87)+'% attendance';let depts=departments.map(d=>{let rs=today.filter(r=>r.dept===d);return [d,rs.length?Math.round(rs.filter(r=>r.status==='Present').length/rs.length*100):[91,86,88,82,89][departments.indexOf(d)]]});$('#departmentBars').innerHTML=depts.map(([d,p])=>`<div class="bar-row"><span>${d}</span><div class="bar-track"><div class="bar-fill" style="width:${p}%"></div></div><span class="bar-value">${p}%</span></div>`).join('');let recent=(records.length?records.slice(-5).reverse():students.slice(0,5).map(s=>({...s,date:'18 Nov 2026',status:'Present'})));$('#recentRows').innerHTML=recent.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td>${esc(r.dept)}</td><td>${esc(r.year)}</td><td>${r.date}</td><td>${badge(r.status)}</td></tr>`).join('')}
+function stat(){
+ const now=new Date(),today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+ const todayRows=records.filter(r=>r.date===today);
+ const present=todayRows.filter(r=>r.status==='Present'||r.status==='Late').length;
+ const absent=todayRows.filter(r=>r.status==='Absent').length;
+ const percent=todayRows.length?Math.round(present/todayRows.length*100):0;
+ $('#dashboardDate').textContent=now.toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).toUpperCase();
+ $('#totalStudents').textContent=students.length.toLocaleString();
+ $('#presentToday').textContent=present.toLocaleString();
+ $('#absentToday').textContent=absent.toLocaleString();
+ $('#presentPercent').textContent=todayRows.length?percent+'% of recorded attendance':'No attendance marked today';
+ const classKeys=new Set(todayRows.map(r=>[r.dept,r.year,r.section,r.subject||'General'].join('|')));
+ $('#classesToday').textContent=classKeys.size.toLocaleString();
+ $('#classesTodayCaption').textContent=classKeys.size+' class groups recorded';
+ const depts=departments.map(d=>{const rs=todayRows.filter(r=>r.dept===d);const p=rs.length?Math.round(rs.filter(r=>r.status==='Present'||r.status==='Late').length/rs.length*100):0;return [d,p]});
+ $('#departmentBars').innerHTML=depts.map(([d,p])=>'<div class="bar-row"><span>'+esc(d)+'</span><div class="bar-track"><div class="bar-fill" style="width:'+p+'%"></div></div><span class="bar-value">'+p+'%</span></div>').join('');
+ const recent=records.slice().sort((a,b)=>(String(b.date)+String(b.roll)).localeCompare(String(a.date)+String(a.roll))).slice(0,5);
+ $('#recentRows').innerHTML=recent.map(r=>'<tr><td><b>'+esc(r.name)+'</b></td><td>'+esc(r.dept)+'</td><td>'+esc(r.year)+'</td><td>'+esc(r.date)+'</td><td>'+badge(r.status)+'</td></tr>').join('')||'<tr><td colspan="5">No attendance records saved yet.</td></tr>';
+}
 function badge(s){return `<span class="status ${s.toLowerCase()}">${s}</span>`}function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function roster(){let d=$('#attDept').value,y=$('#attYear').value,sec=$('#attSection').value,date=$('#attDate').value,q=$('#studentSearch').value.toLowerCase();let list=students.filter(s=>s.dept===d&&s.year===y&&s.section===sec&&(`${s.name} ${s.roll}`).toLowerCase().includes(q));$('#rosterCount').textContent=`${list.length} students · ${date}`;$('#rosterRows').innerHTML=list.map(s=>{let r=records.find(x=>x.roll===s.roll&&x.date===date);return `<tr><td>${s.roll}</td><td><b>${esc(s.name)}</b></td><td>${s.dept}</td><td>${s.year} · ${s.section}</td><td><select class="attendance-select" data-roll="${s.roll}"><option ${(!r||r.status==='Present')?'selected':''}>Present</option><option ${r?.status==='Absent'?'selected':''}>Absent</option><option ${r?.status==='Late'?'selected':''}>Late</option></select></td></tr>`}).join('')||'<tr><td colspan="5">No students match these filters. Try another year, section or department.</td></tr>'}
 ['#attDept','#attYear','#attSection','#attDate','#studentSearch'].forEach(s=>$(s).addEventListener('input',roster));
@@ -59,7 +77,22 @@ function directory(){let q=$('#directorySearch').value.toLowerCase(),d=$('#dirDe
 function reports(){let d=$('#reportDept').value,y=$('#reportYear').value,from=$('#reportFrom').value,to=$('#reportTo').value;let rs=records.filter(r=>(!d||r.dept===d)&&(!y||r.year===y)&&(!from||r.date>=from)&&(!to||r.date<=to));let present=rs.filter(r=>r.status==='Present').length;$('#reportSessions').textContent=rs.length;$('#reportPresent').textContent=present;$('#reportAverage').textContent=rs.length?Math.round(present/rs.length*100)+'%':'—';let grouped={};rs.forEach(r=>{grouped[r.roll]??={...r,n:0,p:0};grouped[r.roll].n++;if(r.status==='Present'||r.status==='Late')grouped[r.roll].p++});$('#reportRows').innerHTML=Object.values(grouped).map(r=>{let p=Math.round(r.p/r.n*100);return `<tr><td>${r.roll}</td><td>${esc(r.name)}</td><td>${r.n}</td><td>${r.p}</td><td><b>${p}%</b></td><td>${badge(p>=75?'Present':'Absent')}</td></tr>`}).join('')||'<tr><td colspan="6">No attendance records yet. Save a register to generate reports.</td></tr>'}
 ['#reportDept','#reportYear','#reportFrom','#reportTo'].forEach(s=>$(s).addEventListener('input',reports));
 function noticeRender(){$('#noticeList').innerHTML=notices.slice().reverse().map(n=>`<article class="notice"><h3>${esc(n.title)}</h3><p>${esc(n.body)}</p><small>Published · ${n.date}</small></article>`).join('')}
-function leaveRender(){$('#leaveRows').innerHTML=leaves.map((l,i)=>`<tr><td>${esc(l.student)}</td><td>${l.from}</td><td>${l.to}</td><td>${esc(l.reason)}</td><td>${badge(l.status)}</td><td>${role()==='Admin'||role()==='Teacher'?`<button class="text-btn" onclick="updateLeave(${i},'Approved')">Approve</button> <button class="text-btn" onclick="updateLeave(${i},'Rejected')">Reject</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="6">No leave requests submitted.</td></tr>'}
+function leaveRender(){
+ $('#leaveRows').innerHTML=leaves.map((l,i)=>'<tr><td>'+esc(l.student)+'</td><td>'+esc(l.from)+'</td><td>'+esc(l.to)+'</td><td>'+esc(l.reason)+'</td><td>'+badge(l.status)+'</td><td>'+(role()==='Admin'||role()==='Teacher'?(l.status==='Pending'?'<button class="text-btn" type="button" data-leave-action="Approved" data-leave-index="'+i+'">Approve</button> <button class="text-btn" type="button" data-leave-action="Rejected" data-leave-index="'+i+'">Reject</button>':'<span class="hint">Reviewed</span>'):'—')+'</td></tr>').join('')||'<tr><td colspan="6">No leave requests submitted.</td></tr>';
+}
+function updateLeave(index,status){
+ if(role()!=='Admin'&&role()!=='Teacher'){toast('Only teachers and admins can review leave requests');return}
+ if(!leaves[index]){toast('This leave request is no longer available');return}
+ if(!['Approved','Rejected'].includes(status)){toast('Invalid review action');return}
+ leaves[index].status=status;leaves[index].reviewedAt=new Date().toISOString();leaves[index].reviewedBy=role();
+ save();leaveRender();toast('Leave request '+status.toLowerCase()+' successfully');
+}
+window.updateLeave=updateLeave;
+$('#leaveRows').addEventListener('click',e=>{
+ const button=e.target.closest('[data-leave-action]');
+ if(!button)return;
+ updateLeave(Number(button.dataset.leaveIndex),button.dataset.leaveAction);
+});
 window.updateLeave=(i,s)=>{leaves[i].status=s;save();leaveRender();toast('Leave request '+s.toLowerCase())};
 
 function myStudentReport(roll){
@@ -149,48 +182,89 @@ document.addEventListener('click',function(event){
 })();
 
 
-/* MITS SHARED ATTENDANCE CODE — Supabase demo backend.
-   This is intentionally a temporary anonymous demo. Never use real student data until secure roles/RLS are enabled. */
-(function () {
- const sb=window.mitsSupabase;
+/* MITS shared attendance code with reliable browser-local fallback.
+   If Supabase is unavailable, the demo continues locally and clearly labels that limitation. */
+(function(){
  const byId=id=>document.getElementById(id);
+ const sb=window.mitsSupabase;
  const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
  const msg=(el,text,color)=>{if(el){el.textContent=text;el.style.color=color||'#bd5548'}};
  const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const teacher=byId('teacherCodeForm'), student=byId('studentCodeForm');
+ const readSession=()=>{try{return JSON.parse(localStorage.getItem('mits_active_attendance_code')||'null')}catch{return null}};
+ const saveSession=s=>localStorage.setItem('mits_active_attendance_code',JSON.stringify(s));
+ const renderCode=(box,s,local)=>{
+  box.innerHTML='<div class="attendance-code-result"><div class="tag">'+(local?'LOCAL DEMO MODE':'SHARED DATABASE')+'</div><div class="code-number">'+escapeHtml(s.code)+'</div><div>'+escapeHtml(s.subject)+' · '+escapeHtml(s.dept)+' · '+escapeHtml(s.year)+' · Section '+escapeHtml(s.section)+'</div><p>Valid until '+new Date(s.expires).toLocaleTimeString()+'</p><p class="hint">'+(local?'This code works in this browser only because the database connection is unavailable.':'Students can submit using the shared database.')+'</p><button type="button" id="mitsRefreshAttendance" class="secondary">Refresh submitted attendance</button><div id="mitsSharedAttendance" style="margin-top:12px"></div></div>';
+  byId('mitsRefreshAttendance').onclick=()=>refresh(s);
+ };
+ async function refresh(session){
+  const out=byId('mitsSharedAttendance');msg(out,'Loading attendance…','#777184');
+  if(sb&&!session.localOnly){
+   try{
+    const {data,error}=await sb.rpc('mits_demo_get_attendance',{p_code:session.code});if(error)throw error;
+    const rows=data.attendance||[];
+    out.innerHTML='<h4>Submitted: '+rows.length+'</h4>'+(rows.length?'<div class="table-wrap"><table><thead><tr><th>Roll no.</th><th>Student</th><th>Status</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+escapeHtml(r.roll_no)+'</td><td>'+escapeHtml(r.full_name)+'</td><td>'+escapeHtml(r.status)+'</td></tr>').join('')+'</tbody></table></div>':'<p>No students have submitted attendance yet.</p>');
+    return;
+   }catch(err){/* Fall through to the local copy. */}
+  }
+  const rows=records.filter(r=>r.attendanceCode===session.code);
+  out.innerHTML='<p class="hint">Local browser records</p><h4>Submitted: '+rows.length+'</h4>'+(rows.length?'<div class="table-wrap"><table><thead><tr><th>Roll no.</th><th>Student</th><th>Status</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+escapeHtml(r.roll)+'</td><td>'+escapeHtml(r.name)+'</td><td>'+escapeHtml(r.status)+'</td></tr>').join('')+'</tbody></table></div>':'<p>No students have submitted attendance yet.</p>');
+ }
+ const teacher=byId('teacherCodeForm'),student=byId('studentCodeForm');
  if(!teacher||!student)return;
- if(!sb){msg(byId('teacherCodeResult'),'Database connection not loaded. Refresh the page or check your internet.');return;}
  teacher.addEventListener('submit',async e=>{
   e.preventDefault();e.stopImmediatePropagation();
   const box=byId('teacherCodeResult'),subject=byId('codeSubject').value.trim();
+  if(!subject){msg(box,'Please enter the subject before generating a code.');return}
   const code=String(Math.floor(100000+Math.random()*900000));
+  const session={code,subject,dept:byId('codeDept').value,year:byId('codeYear').value,section:byId('codeSection').value,date:today(),expires:Date.now()+2*60*60*1000,localOnly:true};
   const btn=teacher.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Generating…';
   try{
-   const {data,error}=await sb.rpc('mits_demo_create_session',{p_code:code,p_subject:subject,p_department:byId('codeDept').value,p_year:byId('codeYear').value,p_section:byId('codeSection').value});
-   if(error)throw error;
-   box.innerHTML='<div style="border:1px solid #b9ded8;border-radius:14px;padding:18px;background:#f1fbf8"><div style="font-size:12px;color:#287f83;font-weight:800">SHARE THIS CODE WITH YOUR CLASS</div><div style="font-size:38px;font-weight:900;letter-spacing:8px;color:#287f83;margin:8px 0">'+escapeHtml(data.code)+'</div><div>'+escapeHtml(data.subject)+' · '+escapeHtml(data.department)+' · '+escapeHtml(data.academic_year)+' · Section '+escapeHtml(data.section)+'</div><p style="font-size:12px;color:#777184">Valid for 2 hours · Shared database connected</p><button type="button" id="mitsRefreshAttendance" class="secondary">Refresh submitted attendance</button><div id="mitsSharedAttendance" style="margin-top:12px"></div></div>';
-   byId('mitsRefreshAttendance').onclick=()=>refresh(code);
-   window.mitsCurrentAttendanceCode=code;
-   if(typeof window.toast==='function')window.toast('Shared attendance code generated');
-  }catch(err){msg(box,err.message||'Could not generate code. Run the Supabase setup SQL first.');}
-  finally{btn.disabled=false;btn.textContent='Generate 6-digit attendance code';}
+   if(sb){
+    const {data,error}=await sb.rpc('mits_demo_create_session',{p_code:code,p_subject:subject,p_department:session.dept,p_year:session.year,p_section:session.section});
+    if(error)throw error;
+    session.localOnly=false;
+    session.expires=data.expires_at?new Date(data.expires_at).getTime():session.expires;
+   }
+   saveSession(session);renderCode(box,session,session.localOnly);
+   toast(session.localOnly?'Local attendance code generated':'Shared attendance code generated');
+  }catch(err){
+   session.localOnly=true;saveSession(session);renderCode(box,session,true);
+   toast('Database unavailable — generated a local demo code');
+  }finally{btn.disabled=false;btn.textContent='Generate 6-digit attendance code'}
  },true);
- async function refresh(code){
-  const out=byId('mitsSharedAttendance');msg(out,'Loading attendance…','#777184');
-  try{
-   const {data,error}=await sb.rpc('mits_demo_get_attendance',{p_code:code});if(error)throw error;
-   const rows=data.attendance||[];
-   out.innerHTML='<h4 style="margin:12px 0 6px">Submitted: '+rows.length+'</h4>'+(rows.length?'<div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th align="left">Roll no.</th><th align="left">Student</th><th align="left">Status</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+escapeHtml(r.roll_no)+'</td><td>'+escapeHtml(r.full_name)+'</td><td>'+escapeHtml(r.status)+'</td></tr>').join('')+'</tbody></table></div>':'<p>No students have submitted attendance yet.</p>');
-  }catch(err){msg(out,err.message||'Could not load attendance');}
- }
  student.addEventListener('submit',async e=>{
   e.preventDefault();e.stopImmediatePropagation();
   const feedback=byId('checkinFeedback'),roll=byId('checkinRoll').value.trim().toUpperCase(),code=byId('checkinCode').value.trim();
   const btn=student.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Submitting…';
+  const localSubmit=()=>{
+   const session=readSession(),person=students.find(x=>String(x.roll).toUpperCase()===roll);
+   if(!session||Date.now()>session.expires||session.date!==today())throw new Error('No active attendance code. Ask your teacher to generate one today.');
+   if(code!==session.code)throw new Error('Incorrect attendance code. Please check with your teacher.');
+   if(!person)throw new Error('Roll number not found in the demo student list.');
+   if(person.dept!==session.dept||person.year!==session.year||person.section!==session.section)throw new Error('This code is for a different class. Please check the class details.');
+   if(records.some(x=>x.roll===person.roll&&x.date===session.date&&x.subject===session.subject))throw new Error('Attendance was already submitted for this subject today.');
+   records.push({...person,date:session.date,status:'Present',subject:session.subject,attendanceCode:session.code,source:'Student code check-in'});
+   save();renderAll();return person;
+  };
   try{
-   const {data,error}=await sb.rpc('mits_demo_submit_attendance',{p_roll:roll,p_code:code});if(error)throw error;
-   msg(feedback,'Attendance submitted successfully for '+data.name+' ('+data.roll_no+') — '+data.subject,'#287f70');student.reset();
-  }catch(err){msg(feedback,err.message||'Could not submit attendance');}
-  finally{btn.disabled=false;btn.textContent='Submit attendance';}
+   let person=null,remoteError=null;
+   if(sb){
+    try{
+     const {data,error}=await sb.rpc('mits_demo_submit_attendance',{p_roll:roll,p_code:code});
+     if(error)throw error;
+     person=students.find(x=>String(x.roll).toUpperCase()===roll)||{roll:data.roll_no,name:data.name};
+     const session=readSession();
+     if(!records.some(x=>x.roll===person.roll&&x.date===today()&&x.subject===data.subject)){
+      records.push({...person,date:today(),status:'Present',subject:data.subject,attendanceCode:session?.code||code,source:'Shared attendance code'});save();renderAll();
+     }
+    }catch(err){remoteError=err}
+   }
+   if(!person)person=localSubmit();
+   msg(feedback,'Attendance submitted successfully for '+person.name+'.'+(remoteError?' Saved in this browser only because the shared database could not be reached.':''),'#287f70');
+   student.reset();toast('Attendance submitted');
+  }catch(err){msg(feedback,err.message||'Could not submit attendance')}
+  finally{btn.disabled=false;btn.textContent='Submit attendance'}
  },true);
+ const active=readSession(),box=byId('teacherCodeResult');
+ if(active&&active.date===today()&&Date.now()<active.expires)renderCode(box,active,!!active.localOnly);
 })();
