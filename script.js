@@ -40,6 +40,7 @@ function enterPortal(selectedRole){
  const roleSelect=document.querySelector('#roleSelect');
  if(!roleSelect)return;
  roleSelect.value=selectedRole;
+ roleSelect.dispatchEvent(new Event('change',{bubbles:true}));
  document.querySelector('#welcomeRole').textContent=selectedRole;
  document.querySelector('#avatar').textContent=selectedRole==='Admin'?'AD':selectedRole==='Teacher'?'TR':'ST';
  document.querySelector('#portalWelcome').style.display='none';
