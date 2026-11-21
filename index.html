@@ -164,7 +164,7 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 </main></div>
 <div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">Add record</h3><button id="closeModal" class="close">×</button></div><div id="modalBody"></div></div></div>
 <div id="toast" class="toast"></div>
-<script src="script.js?v=localdemo5"></script>
+<script src="script.js?v=localdemo6"></script>
 
 <script>
 /* Direct button action avoids conflicts with older delegated login/signup handlers. */
@@ -235,36 +235,40 @@ window.mitsOpenDashboard = function (selectedRole, event) {
 })();
 </script>
 <script>
-/* Final role-based navigation guard for the local demo. */
+/* Explicit role menu controller. */
 (function(){
- const permissions={
+ const rules={
   Student:['dashboard','checkin','studentReport','timetable','notices','leave'],
   Teacher:['dashboard','attendance','teacherCode','students','reports','notices','leave'],
   Admin:['dashboard','attendance','teacherCode','checkin','studentReport','students','reports','timetable','notices','leave']
  };
- function applyMitsRole(){
-  const picker=document.getElementById('roleSelect');
-  const current=(picker&&permissions[picker.value])?picker.value:'Student';
-  const allowed=permissions[current];
-  document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
-   el.style.setProperty('display',allowed.includes(el.dataset.view)?'flex':'none','important');
+ function update(){
+  var picker=document.getElementById('roleSelect');
+  var role=picker&&rules[picker.value]?picker.value:'Student';
+  var allowed=rules[role];
+  document.querySelectorAll('nav .nav-item[data-view]').forEach(function(el){
+   el.style.display=allowed.indexOf(el.getAttribute('data-view'))>=0?'flex':'none';
   });
-  document.querySelectorAll('[data-goto]').forEach(el=>{
-   el.style.setProperty('display',allowed.includes(el.dataset.goto)?'':'none','important');
+  document.querySelectorAll('.quick-grid [data-goto], .panel-head [data-goto]').forEach(function(el){
+   el.style.display=allowed.indexOf(el.getAttribute('data-goto'))>=0?'':'none';
   });
-  const publish=document.getElementById('addNoticeBtn');
-  if(publish)publish.style.setProperty('display',current==='Student'?'none':'','important');
-  const active=document.querySelector('.view.active');
-  if(active&&!allowed.includes(active.id)){
-   document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='dashboard'));
-   document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view==='dashboard'));
-   const title=document.getElementById('pageTitle');if(title)title.textContent='Dashboard';
+  var quick=document.querySelector('.quick-grid');
+  if(quick){
+   var visible=quick.querySelectorAll('button:not([style*="display: none"])').length;
+   quick.closest('.panel').style.display=visible?'':'none';
+  }
+  var post=document.getElementById('addNoticeBtn');
+  if(post)post.style.display=(role==='Teacher'||role==='Admin')?'':'none';
+  var active=document.querySelector('.view.active');
+  if(active&&allowed.indexOf(active.id)<0){
+   document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('active',v.id==='dashboard')});
+   document.querySelectorAll('nav .nav-item').forEach(function(v){v.classList.toggle('active',v.getAttribute('data-view')==='dashboard')});
+   var title=document.getElementById('pageTitle');if(title)title.textContent='Dashboard';
   }
  }
- const picker=document.getElementById('roleSelect');
- if(picker)picker.addEventListener('change',applyMitsRole);
- applyMitsRole();
- window.addEventListener('pageshow',applyMitsRole);
-})();
-</script>
+ var picker=document.getElementById('roleSelect');
+ if(picker)picker.addEventListener('change',update);
+ update();
+ window.mitsUpdateRoleMenu=update;
+})();</script>
 </body></html>
