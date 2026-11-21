@@ -8,11 +8,11 @@ let students=get('students',seed), records=get('records',[]), notices=get('notic
 function save(){localStorage.setItem('mits_students',JSON.stringify(students));localStorage.setItem('mits_records',JSON.stringify(records));localStorage.setItem('mits_notices',JSON.stringify(notices));localStorage.setItem('mits_leaves',JSON.stringify(leaves))}
 function toast(m){let t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2300)}
 function role(){return $('#roleSelect').value}
-function navigate(v){$$('.view').forEach(x=>x.classList.toggle('active',x.id===v));$$('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.view===v));$('#pageTitle').textContent=({dashboard:'Dashboard',attendance:'Attendance',teacherCode:'Teacher: Generate Code',checkin:'Join with Code',students:'Students',reports:'Reports & Analytics',timetable:'Timetable',notices:'Notice board',leave:'Leave requests'})[v];renderAll()}
+function navigate(v){$$('.view').forEach(x=>x.classList.toggle('active',x.id===v));$$('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.view===v));$('#pageTitle').textContent=({dashboard:'Dashboard',attendance:'Attendance',teacherCode:'Teacher: Generate Code',checkin:'Join with Code',myReport:'My Attendance & Analytics',students:'Students',reports:'Reports & Analytics',timetable:'Timetable',notices:'Notice board',leave:'Leave requests'})[v];renderAll()}
 function applyRolePermissions(){
  const current=$('#roleSelect').value;
  const permissions={
-  Student:{views:['dashboard','checkin','timetable','notices','leave'],quick:['checkin','notices','leave','timetable']},
+  Student:{views:['dashboard','checkin','myReport','timetable','notices','leave'],quick:['checkin','myReport','notices','leave','timetable']},
   Teacher:{views:['dashboard','attendance','teacherCode','students','reports','leave'],quick:['teacherCode','attendance','students','reports','leave']},
   Admin:{views:['dashboard','attendance','teacherCode','checkin','students','reports','timetable','notices','leave'],quick:['attendance','teacherCode','checkin','students','reports','notices','leave','timetable']}
  };
@@ -61,12 +61,26 @@ function reports(){let d=$('#reportDept').value,y=$('#reportYear').value,from=$(
 function noticeRender(){$('#noticeList').innerHTML=notices.slice().reverse().map(n=>`<article class="notice"><h3>${esc(n.title)}</h3><p>${esc(n.body)}</p><small>Published · ${n.date}</small></article>`).join('')}
 function leaveRender(){$('#leaveRows').innerHTML=leaves.map((l,i)=>`<tr><td>${esc(l.student)}</td><td>${l.from}</td><td>${l.to}</td><td>${esc(l.reason)}</td><td>${badge(l.status)}</td><td>${role()==='Admin'||role()==='Teacher'?`<button class="text-btn" onclick="updateLeave(${i},'Approved')">Approve</button> <button class="text-btn" onclick="updateLeave(${i},'Rejected')">Reject</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="6">No leave requests submitted.</td></tr>'}
 window.updateLeave=(i,s)=>{leaves[i].status=s;save();leaveRender();toast('Leave request '+s.toLowerCase())};
+
+function myStudentReport(roll){
+ const key=String(roll||'').trim().toUpperCase();
+ const student=students.find(s=>String(s.roll).toUpperCase()===key);
+ const rows=records.filter(r=>String(r.roll).toUpperCase()===key).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+ const total=rows.length,present=rows.filter(r=>r.status==='Present'||r.status==='Late').length;
+ $('#myReportTotal').textContent=student?total:'—';
+ $('#myReportPresent').textContent=student?present:'—';
+ $('#myReportPercent').textContent=student?(total?Math.round(present/total*100)+'%':'0%'):'—';
+ $('#myReportStudent').textContent=student?student.name+' · '+student.roll+' · '+student.dept+' · '+student.year:'No student found for roll number '+key+'.';
+ $('#myReportRows').innerHTML=!student?'<tr><td colspan="3">Please check your roll number.</td></tr>':rows.map(r=>'<tr><td>'+esc(r.date)+'</td><td>'+esc(r.subject||'Class attendance')+'</td><td>'+badge(r.status)+'</td></tr>').join('')||'<tr><td colspan="3">No attendance records found yet for this roll number.</td></tr>';
+}
+
 function renderAll(){stat();roster();directory();reports();noticeRender();leaveRender()}
 function openModal(title,html,handler){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=html;$('#modal').classList.add('open');$('#modalBody form').onsubmit=e=>{e.preventDefault();handler(new FormData(e.target));$('#modal').classList.remove('open')}}
 $('#closeModal').onclick=()=>$('#modal').classList.remove('open');$('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').classList.remove('open')};
 $('#addStudentBtn').onclick=()=>openModal('Add student',`<form><label>Student full name<input name="name" required></label><label>Roll number<input name="roll" required></label><label>Department<select name="dept">${departments.map(d=>`<option>${d}</option>`)}</select></label><label>Academic year<select name="year">${['1st Year','2nd Year','3rd Year','4th Year'].map(x=>`<option>${x}</option>`)}</select></label><label>Section<select name="section"><option>A</option><option>B</option><option>C</option></select></label><label>Contact number<input name="phone" inputmode="numeric"></label><button class="primary">Save student</button></form>`,f=>{if(students.some(s=>s.roll===f.get('roll'))){toast('Roll number already exists');return}students.push(Object.fromEntries(['name','roll','dept','year','section','phone'].map(k=>[k,f.get(k)])));save();renderAll();toast('Student added')});
 $('#addNoticeBtn').onclick=()=>openModal('Publish notice',`<form><label>Notice title<input name="title" required></label><label>Message<textarea name="body" required></textarea></label><button class="primary">Publish notice</button></form>`,f=>{notices.push({title:f.get('title'),body:f.get('body'),date:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})});save();noticeRender();toast('Notice published')});
 $('#newLeaveBtn').onclick=()=>openModal('Apply for leave',`<form><label>Student name<input name="student" required></label><label>From date<input name="from" type="date" required></label><label>To date<input name="to" type="date" required></label><label>Reason<textarea name="reason" required></textarea></label><button class="primary">Submit request</button></form>`,f=>{leaves.push({student:f.get('student'),from:f.get('from'),to:f.get('to'),reason:f.get('reason'),status:'Pending'});save();leaveRender();toast('Leave request submitted')});
+$('#myReportForm').addEventListener('submit',e=>{e.preventDefault();myStudentReport($('#myReportRoll').value);});
 $('#exportCsv').onclick=()=>{let rows=[['Roll','Name','Department','Year','Date','Status'],...records.map(r=>[r.roll,r.name,r.dept,r.year,r.date,r.status])];let csv=rows.map(r=>r.map(x=>'"'+String(x??'').replaceAll('"','""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='MITS-attendance-report.csv';a.click();URL.revokeObjectURL(a.href)};
 $('#resetDemo').onclick=()=>{if(confirm('Reset all MITS demo data in this browser?')){['students','records','notices','leaves'].forEach(k=>localStorage.removeItem('mits_'+k));location.reload()}};
 renderAll();
