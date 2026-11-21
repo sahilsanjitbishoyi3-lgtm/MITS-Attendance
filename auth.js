@@ -7,6 +7,38 @@
   const title = document.getElementById('modalTitle');
   const body = document.getElementById('modalBody');
   const roleSelect = document.getElementById('roleSelect');
+
+  // TEMPORARY DEMO MODE: bypass sign-in so stakeholders can preview each role.
+  // This is NOT authentication or authorization. Use only with fictional demo data.
+  const MITS_DEMO_ACCESS_WITHOUT_LOGIN = true;
+  if (MITS_DEMO_ACCESS_WITHOUT_LOGIN) {
+    document.addEventListener('click', event => {
+      const button = event.target.closest('[data-enter]');
+      if (!button) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const chosenRole = button.getAttribute('data-enter');
+      if (roleSelect) {
+        roleSelect.disabled = false;
+        roleSelect.value = chosenRole;
+        roleSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      if (welcome) welcome.style.display = 'none';
+      const name = document.getElementById('welcomeRole');
+      const avatar = document.getElementById('avatar');
+      if (name) name.textContent = chosenRole + ' Demo';
+      if (avatar) avatar.textContent = chosenRole === 'Admin' ? 'AD' : chosenRole === 'Teacher' ? 'TR' : 'ST';
+      let warning = document.getElementById('mitsDemoModeWarning');
+      if (!warning) {
+        warning = document.createElement('div');
+        warning.id = 'mitsDemoModeWarning';
+        warning.style.cssText = 'position:sticky;top:0;z-index:9999;padding:10px 14px;background:#fff1cc;color:#704d00;text-align:center;font-size:12px;font-weight:600';
+        warning.textContent = 'DEMO MODE — login is temporarily disabled. Do not enter or use real student data.';
+        document.body.prepend(warning);
+      }
+    }, true);
+    return;
+  }
   if (!sb) {
     console.error('MITS Supabase client is unavailable.');
     return;
