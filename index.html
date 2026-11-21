@@ -66,6 +66,7 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
   <nav>
     <button class="nav-item active" data-view="dashboard">▦ <span>Dashboard</span></button>
     <button class="nav-item" data-view="attendance">◷ <span>Attendance</span></button>
+    <button class="nav-item" data-view="teacherCode">⌁ <span>Teacher: Generate Code</span></button>
     <button class="nav-item" data-view="checkin">⌁ <span>Join with code</span></button>
     <button class="nav-item" data-view="students">♙ <span>Students</span></button>
     <button class="nav-item" data-view="reports">▤ <span>Reports & Analytics</span></button>
@@ -104,6 +105,20 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
  </article>
  <div class="attendance-tools"><span id="rosterCount">Showing students</span><div><button class="secondary" id="markAllPresent">Mark all present</button><button class="secondary" id="markAllAbsent">Mark all absent</button></div></div>
  <article class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Roll no.</th><th>Student name</th><th>Department</th><th>Year / Section</th><th>Attendance status</th></tr></thead><tbody id="rosterRows"></tbody></table></div></article>
+</section>
+<section id="teacherCode" class="view">
+ <div class="section-intro"><div><h2>Teacher attendance code</h2><p>Generate a one-time classroom code for students to submit attendance.</p></div></div>
+ <article class="panel" style="max-width:680px">
+  <span class="tag">TEACHER DEMO</span>
+  <form id="teacherCodeForm" style="display:grid;gap:13px;margin-top:15px">
+   <label>Department<select id="codeDept"><option>Computer Science</option><option>Mechanical</option><option>Electrical</option><option>Civil</option><option>Electronics</option></select></label>
+   <label>Academic year<select id="codeYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></label>
+   <label>Section<select id="codeSection"><option>A</option><option>B</option><option>C</option></select></label>
+   <label>Subject<input id="codeSubject" required placeholder="Example: Programming in C"></label>
+   <button class="primary" type="submit">Generate 6-digit attendance code</button>
+  </form>
+  <div id="teacherCodeResult" style="margin-top:16px"></div>
+ </article>
 </section>
 <section id="checkin" class="view">
  <div class="section-intro"><div><h2>Student attendance check-in</h2><p>Enter your roll number and the code announced by your teacher.</p></div></div>
