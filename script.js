@@ -141,3 +141,60 @@ document.addEventListener('click',function(event){
   finally{btn.disabled=false;btn.textContent='Submit attendance';}
  },true);
 })();
+
+
+/* Role-specific navigation and dashboards (demo mode). */
+(function(){
+ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+ const rules={
+  Student:{views:["dashboard","checkin","timetable","notices","leave"],quick:["checkin","notices","leave"]},
+  Teacher:{views:["dashboard","attendance","teacherCode","checkin","students","reports","timetable","notices","leave"],quick:["teacherCode","attendance","students","reports","notices"]},
+  Admin:{views:["dashboard","attendance","teacherCode","checkin","students","reports","timetable","notices","leave"],quick:["attendance","teacherCode","checkin","students","reports","notices"]}
+ };
+ function applyRole(){
+  const role=$("#roleSelect")?.value||"Student",rule=rules[role]||rules.Student;
+  $$(".nav-item").forEach(b=>{b.hidden=!rule.views.includes(b.dataset.view)});
+  $$("[data-goto]").forEach(b=>{b.hidden=!rule.quick.includes(b.dataset.goto)});
+  // Keep the student home screen focused on student tasks, not college-wide statistics.
+  const dashboard=$("#dashboard");
+  if(dashboard){
+   const stats=dashboard.querySelector(".stats");
+   const analytics=dashboard.querySelector(".grid-two");
+   const activity=dashboard.querySelector(":scope > .panel");
+   if(role==="Student"){
+    if(stats)stats.hidden=true;
+    if(analytics)analytics.hidden=true;
+    if(activity)activity.hidden=true;
+    let studentHome=$("#studentDashboardHome");
+    if(!studentHome){
+     studentHome=document.createElement("section");
+     studentHome.id="studentDashboardHome";
+     studentHome.innerHTML='<article class="panel" style="margin-top:18px"><div class="panel-head"><div><h3>Welcome to your student space</h3><p>Use these student services to stay updated.</p></div><span class="tag">STUDENT</span></div><div class="quick-grid"><button data-goto="checkin"><b>✓</b><span>Submit attendance with teacher code</span></button><button data-goto="notices"><b>♢</b><span>View college notices</span></button><button data-goto="leave"><b>✉</b><span>Apply for leave</span></button><button data-goto="timetable"><b>▦</b><span>View timetable</span></button></div></article>';
+     dashboard.appendChild(studentHome);
+     studentHome.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>{const target=b.dataset.goto;const nav=$('.nav-item[data-view="'+target+'"]');if(nav)nav.click()}));
+    }
+    studentHome.hidden=false;
+   }else{
+    if(stats)stats.hidden=false;
+    if(analytics)analytics.hidden=false;
+    if(activity)activity.hidden=false;
+    const studentHome=$("#studentDashboardHome");if(studentHome)studentHome.hidden=true;
+   }
+  }
+  // If the currently open view is not allowed, return to that role's dashboard.
+  const active=$(".view.active");
+  if(active&&!rule.views.includes(active.id)){
+   if(typeof window.mitsNavigate==="function")window.mitsNavigate("dashboard");
+   else{
+    $$(".view").forEach(v=>v.classList.toggle("active",v.id==="dashboard"));
+    $$(".nav-item").forEach(v=>v.classList.toggle("active",v.dataset.view==="dashboard"));
+    $("#pageTitle").textContent="Dashboard";
+   }
+  }
+ }
+ const roleSelect=$("#roleSelect");
+ if(roleSelect){
+  roleSelect.addEventListener("change",applyRole);
+  applyRole();
+ }
+})();
