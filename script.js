@@ -17,7 +17,7 @@ function applyRolePermissions(){
   Admin:{views:['dashboard','attendance','teacherCode','checkin','students','reports','timetable','notices','leave'],quick:['attendance','teacherCode','checkin','students','reports','notices','leave','timetable']}
  };
  const allowed=permissions[current]||permissions.Admin;
- $('.nav-item').forEach(el=>{el.hidden=!allowed.views.includes(el.dataset.view)});
+ $$('.nav-item').forEach(el=>{el.hidden=!allowed.views.includes(el.dataset.view)});
  const dashboard=$('#dashboard');
  if(dashboard){
   const stats=dashboard.querySelector('.stats');
@@ -36,11 +36,11 @@ function applyRolePermissions(){
    studentHome.hidden=false;
   }else if(studentHome){studentHome.hidden=true}
  }
- $('[data-goto]').forEach(el=>{el.hidden=!allowed.quick.includes(el.dataset.goto)});
+ $$('[data-goto]').forEach(el=>{el.hidden=!allowed.quick.includes(el.dataset.goto)});
  const active=$('.view.active');
  if(!active||!allowed.views.includes(active.id)){
-  $('.view').forEach(el=>el.classList.toggle('active',el.id==='dashboard'));
-  $('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view==='dashboard'));
+  $$('.view').forEach(el=>el.classList.toggle('active',el.id==='dashboard'));
+  $$('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view==='dashboard'));
   $('#pageTitle').textContent='Dashboard';
  }
  $('#welcomeRole').textContent=current==='Admin'?'Admin Demo':current==='Teacher'?'Teacher Demo':'Student Demo';
