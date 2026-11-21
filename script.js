@@ -56,3 +56,85 @@ document.addEventListener('click',function(event){
  const form=`<form><label>Full name<input name="name" required></label><label>Email address<input name="email" type="email" required></label>${selected==='Student'?'<label>Student roll number<input name="roll" required></label>':''}<label>Create password<input name="password" type="password" minlength="8" required></label><button class="primary" type="submit">${selected==='Admin'?'Send access request':'Create demo account'}</button><p style="font-size:11px;color:#877d8b;line-height:1.5">Demo only: this does not create a secure account. Supabase authentication will be connected later.</p></form>`;
  openModal(title,form,()=>toast(selected==='Admin'?'Admin access request preview only':'Signup preview only — secure account setup comes later.'));
 });
+
+
+/* MITS role-specific dashboard preview.
+   This is presentation-only until Supabase identity and scoped queries are connected.
+   Never treat the demo role selector or localStorage data as authorization. */
+(function initRoleDashboardPreview(){
+  const roleSelect = document.querySelector('#roleSelect');
+  if (!roleSelect) return;
+  const access = {
+    Admin: ['dashboard','attendance','students','reports','timetable','notices','leave'],
+    Teacher: ['dashboard','attendance','reports','timetable','notices','leave'],
+    Student: ['dashboard','reports','timetable','notices','leave']
+  };
+  const titles = {
+    Student: 'Student workspace · view only',
+    Teacher: 'Teacher workspace · assigned classes only',
+    Admin: 'Administrator workspace · full management'
+  };
+  function addPreviewNotice(){
+    let note=document.getElementById('rolePreviewNotice');
+    if(!note){
+      note=document.createElement('div');
+      note.id='rolePreviewNotice';
+      note.style.cssText='margin:0 0 18px;padding:12px 15px;border:1px solid #e8d9a8;border-radius:12px;background:#fff9e9;color:#705b2c;font-size:12px;line-height:1.5';
+      document.querySelector('.content')?.prepend(note);
+    }
+    const current=roleSelect.value;
+    note.textContent=titles[current]+' — preview only. Secure account-based permissions and database filtering are not active yet. Do not enter real student information.';
+  }
+  function apply(){
+    const current=roleSelect.value;
+    const allowed=access[current]||access.Student;
+    document.querySelectorAll('.nav-item').forEach(btn=>{
+      const show=allowed.includes(btn.dataset.view);
+      btn.hidden=!show;
+      btn.setAttribute('aria-hidden',String(!show));
+    });
+    document.querySelectorAll('[data-goto]').forEach(btn=>{
+      const show=allowed.includes(btn.dataset.goto);
+      btn.hidden=!show;
+    });
+    // Student and teacher preview screens must not display college-wide demo rows.
+    const restricted=current!=='Admin';
+    ['#stats','#departmentBars','#recentRows','#rosterRows','#directoryRows','#reportRows','#leaveRows'].forEach(sel=>{
+      const el=document.querySelector(sel);
+      if(el && restricted) el.innerHTML='';
+    });
+    const total=document.querySelector('#totalStudents');
+    if(total && current==='Student') total.textContent='—';
+    const present=document.querySelector('#presentToday');
+    if(present && current==='Student') present.textContent='—';
+    const absent=document.querySelector('#absentToday');
+    if(absent && current==='Student') absent.textContent='—';
+    // Disable demo mutations for non-admin users until assignment-scoped database actions exist.
+    ['#addStudentBtn','#addNoticeBtn','#resetDemo'].forEach(sel=>{
+      const el=document.querySelector(sel);
+      if(el) el.hidden=current!=='Admin';
+    });
+    ['#saveAttendance','#markAllPresent','#markAllAbsent'].forEach(sel=>{
+      const el=document.querySelector(sel);
+      if(el) el.hidden=current==='Student';
+    });
+    const addLeave=document.querySelector('#newLeaveBtn');
+    if(addLeave) addLeave.hidden=current==='Admin';
+    addPreviewNotice();
+    const active=document.querySelector('.nav-item.active');
+    if(active && active.hidden){
+      const first=allowed[0];
+      if(typeof navigate==='function') navigate(first);
+    }
+  }
+  const oldNavigate=window.navigate;
+  if(typeof oldNavigate==='function'){
+    window.navigate=function(v){
+      const allowed=access[roleSelect.value]||access.Student;
+      if(!allowed.includes(v)){toast('This section is not available for this role.');return;}
+      oldNavigate(v);
+    };
+  }
+  roleSelect.addEventListener('change',apply);
+  apply();
+})();
