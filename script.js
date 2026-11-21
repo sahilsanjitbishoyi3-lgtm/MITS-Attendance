@@ -29,7 +29,7 @@ function applyRolePermissions(){
    if(!studentHome){
     studentHome=document.createElement('section');
     studentHome.id='studentDashboardHome';
-    studentHome.innerHTML='<article class="panel"><div class="panel-head"><div><h3>My student dashboard</h3><p>Quick access to your college services.</p></div><span class="tag">STUDENT</span></div><div class="quick-grid"><button data-goto="checkin"><b>✓</b><span>Join with attendance code</span></button><button data-goto="timetable"><b>▦</b><span>View timetable</span></button><button data-goto="notices"><b>♢</b><span>View notices</span></button><button data-goto="leave"><b>✉</b><span>Apply for leave</span></button></div></article>';
+    studentHome.innerHTML='<article class="panel"><div class="panel-head"><div><h3>My student dashboard</h3><p>Quick access to your college services.</p></div><span class="tag">STUDENT</span></div><div class="quick-grid"><button data-goto="checkin"><b>✓</b><span>Join with attendance code</span></button><button data-goto="myReport"><b>▤</b><span>My Attendance Report</span></button><button data-goto="timetable"><b>▦</b><span>View timetable</span></button><button data-goto="notices"><b>♢</b><span>View notices</span></button><button data-goto="leave"><b>✉</b><span>Apply for leave</span></button></div></article>';
     dashboard.appendChild(studentHome);
     studentHome.querySelectorAll('[data-goto]').forEach(btn=>btn.addEventListener('click',()=>navigate(btn.dataset.goto)));
    }
