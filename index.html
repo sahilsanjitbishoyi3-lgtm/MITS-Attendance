@@ -82,12 +82,12 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 <div class="topbar-right"><img class="deity-header" src="deity-header.png" alt="Deity image"><div class="top-actions"><select id="roleSelect" aria-label="Choose role"><option>Admin</option><option>Teacher</option><option>Student</option></select><div class="avatar" id="avatar">AD</div></div></div></header>
 <div class="content">
 <section id="dashboard" class="view active">
-  <div class="welcome"><div><div class="eyebrow light">WEDNESDAY, 18 NOVEMBER 2026</div><h2>Good evening, <span id="welcomeRole">Admin</span> 👋</h2><p>Here’s your college attendance overview for today.</p></div><div class="welcome-icon">✦</div></div>
+  <div class="welcome"><div><div class="eyebrow light" id="dashboardDate">TODAY</div><h2>Good evening, <span id="welcomeRole">Admin</span> 👋</h2><p>Here’s your college attendance overview for today.</p></div><div class="welcome-icon">✦</div></div>
   <div class="stats">
     <article class="stat-card"><span class="stat-icon blue">♙</span><div class="stat-label">Total students</div><strong id="totalStudents">1,248</strong><small class="positive">Across all departments</small></article>
     <article class="stat-card"><span class="stat-icon green">✓</span><div class="stat-label">Present today</div><strong id="presentToday">1,086</strong><small class="positive" id="presentPercent">87.0% attendance</small></article>
     <article class="stat-card"><span class="stat-icon orange">◷</span><div class="stat-label">Absent today</div><strong id="absentToday">162</strong><small>Needs follow-up</small></article>
-    <article class="stat-card"><span class="stat-icon purple">▤</span><div class="stat-label">Classes today</div><strong>32</strong><small>Across 8 departments</small></article>
+    <article class="stat-card"><span class="stat-icon purple">▤</span><div class="stat-label">Classes today</div><strong id="classesToday">0</strong><small id="classesTodayCaption">No classes recorded yet</small></article>
   </div>
   <div class="grid-two">
     <article class="panel"><div class="panel-head"><div><h3>Attendance by department</h3><p>Today's attendance percentage</p></div><span class="tag">Today</span></div><div id="departmentBars" class="bars"></div></article>
@@ -110,8 +110,8 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 <section id="teacherCode" class="view">
  <div class="section-intro"><div><h2>Teacher attendance code</h2><p>Generate a one-time classroom code for students to submit attendance.</p></div></div>
  <article class="panel" style="max-width:680px">
-  <span class="tag">TEACHER DEMO</span>
-  <form id="teacherCodeForm" style="display:grid;gap:13px;margin-top:15px">
+  <span class="tag">TEACHER ATTENDANCE</span>
+  <form id="teacherCodeForm" class="teacher-code-form">
    <label>Department<select id="codeDept"><option>Computer Science</option><option>Mechanical</option><option>Electrical</option><option>Civil</option><option>Electronics</option></select></label>
    <label>Academic year<select id="codeYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></label>
    <label>Section<select id="codeSection"><option>A</option><option>B</option><option>C</option></select></label>
@@ -169,7 +169,7 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 <div id="toast" class="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=20261121"></script>
-<script src="script.js?v=20261121-student-report2"></script>
+<script src="script.js?v=20261121-working-actions1"></script>
 
 
 </body></html>
