@@ -66,6 +66,7 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
   <nav>
     <button class="nav-item active" data-view="dashboard">▦ <span>Dashboard</span></button>
     <button class="nav-item" data-view="attendance">◷ <span>Attendance</span></button>
+    <button class="nav-item" data-view="checkin">⌁ <span>Join with code</span></button>
     <button class="nav-item" data-view="students">♙ <span>Students</span></button>
     <button class="nav-item" data-view="reports">▤ <span>Reports & Analytics</span></button>
     <button class="nav-item" data-view="timetable">▦ <span>Timetable</span></button>
@@ -103,6 +104,18 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
  </article>
  <div class="attendance-tools"><span id="rosterCount">Showing students</span><div><button class="secondary" id="markAllPresent">Mark all present</button><button class="secondary" id="markAllAbsent">Mark all absent</button></div></div>
  <article class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Roll no.</th><th>Student name</th><th>Department</th><th>Year / Section</th><th>Attendance status</th></tr></thead><tbody id="rosterRows"></tbody></table></div></article>
+</section>
+<section id="checkin" class="view">
+ <div class="section-intro"><div><h2>Student attendance check-in</h2><p>Enter your roll number and the code announced by your teacher.</p></div></div>
+ <article class="panel" style="max-width:620px">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:15px"><span class="tag">DEMO CHECK-IN</span><span style="font-size:12px;color:#777184">Sample data · same browser only</span></div>
+  <form id="studentCodeForm" style="display:grid;gap:13px">
+   <label>Student roll number<input id="checkinRoll" required placeholder="Example: MITS001" autocomplete="off"></label>
+   <label>Attendance code<input id="checkinCode" required inputmode="numeric" maxlength="6" placeholder="Enter 6-digit teacher code" autocomplete="off"></label>
+   <button class="primary" type="submit">Submit attendance</button>
+  </form>
+  <div id="checkinFeedback" style="margin-top:14px;font-size:13px"></div>
+ </article>
 </section>
 <section id="students" class="view">
  <div class="section-intro"><div><h2>Student directory</h2><p>Manage student records and academic details.</p></div><button class="primary" id="addStudentBtn">＋ Add student</button></div>
