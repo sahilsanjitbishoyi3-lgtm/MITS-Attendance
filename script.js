@@ -8,7 +8,7 @@ let students=get('students',seed), records=get('records',[]), notices=get('notic
 function save(){localStorage.setItem('mits_students',JSON.stringify(students));localStorage.setItem('mits_records',JSON.stringify(records));localStorage.setItem('mits_notices',JSON.stringify(notices));localStorage.setItem('mits_leaves',JSON.stringify(leaves))}
 function toast(m){let t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2300)}
 function role(){return $('#roleSelect').value}
-function navigate(v){$$('.view').forEach(x=>x.classList.toggle('active',x.id===v));$$('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.view===v));$('#pageTitle').textContent=({dashboard:'Dashboard',attendance:'Attendance',students:'Students',reports:'Reports & Analytics',timetable:'Timetable',notices:'Notice board',leave:'Leave requests'})[v];renderAll()}
+function navigate(v){$$('.view').forEach(x=>x.classList.toggle('active',x.id===v));$$('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.view===v));$('#pageTitle').textContent=({dashboard:'Dashboard',attendance:'Attendance',teacherCode:'Teacher: Generate Code',checkin:'Join with Code',students:'Students',reports:'Reports & Analytics',timetable:'Timetable',notices:'Notice board',leave:'Leave requests'})[v];renderAll()}
 $$('.nav-item').forEach(b=>b.onclick=()=>navigate(b.dataset.view));$$('[data-goto]').forEach(b=>b.onclick=()=>navigate(b.dataset.goto));
 $('#roleSelect').onchange=()=>{$('#welcomeRole').textContent=role();$('#avatar').textContent=role()==='Admin'?'AD':role()==='Teacher'?'TR':'ST';renderAll();toast('Viewing '+role()+' demo workspace')};
 function stat(){let today=records.filter(r=>r.date==='2026-11-18'),present=today.filter(r=>r.status==='Present').length;$('#totalStudents').textContent=students.length.toLocaleString();$('#presentToday').textContent=present||Math.round(students.length*.87);$('#absentToday').textContent=today.length?today.length-present:Math.round(students.length*.13);$('#presentPercent').textContent=(today.length?Math.round(present/today.length*100):87)+'% attendance';let depts=departments.map(d=>{let rs=today.filter(r=>r.dept===d);return [d,rs.length?Math.round(rs.filter(r=>r.status==='Present').length/rs.length*100):[91,86,88,82,89][departments.indexOf(d)]]});$('#departmentBars').innerHTML=depts.map(([d,p])=>`<div class="bar-row"><span>${d}</span><div class="bar-track"><div class="bar-fill" style="width:${p}%"></div></div><span class="bar-value">${p}%</span></div>`).join('');let recent=(records.length?records.slice(-5).reverse():students.slice(0,5).map(s=>({...s,date:'18 Nov 2026',status:'Present'})));$('#recentRows').innerHTML=recent.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td>${esc(r.dept)}</td><td>${esc(r.year)}</td><td>${r.date}</td><td>${badge(r.status)}</td></tr>`).join('')}
@@ -56,3 +56,129 @@ document.addEventListener('click',function(event){
  const form=`<form><label>Full name<input name="name" required></label><label>Email address<input name="email" type="email" required></label>${selected==='Student'?'<label>Student roll number<input name="roll" required></label>':''}<label>Create password<input name="password" type="password" minlength="8" required></label><button class="primary" type="submit">${selected==='Admin'?'Send access request':'Create demo account'}</button><p style="font-size:11px;color:#877d8b;line-height:1.5">Demo only: this does not create a secure account. Supabase authentication will be connected later.</p></form>`;
  openModal(title,form,()=>toast(selected==='Admin'?'Admin access request preview only':'Signup preview only — secure account setup comes later.'));
 });
+
+
+/* MITS daily attendance code demo — browser-local only, not secure or cross-device. */
+(function(){
+ const $id=id=>document.getElementById(id);
+ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+ const readSession=()=>{try{return JSON.parse(localStorage.getItem('mits_active_attendance_code')||'null')}catch{return null}};
+ const showCode=()=>{
+   const s=readSession(), box=$id('teacherCodeResult'); if(!box)return;
+   if(!s){box.innerHTML='<p style="color:#777184">No active code yet. Generate one above.</p>';return}
+   const expired=Date.now()>s.expires;
+   box.innerHTML=expired?'<p style="color:#bd5548;font-weight:700">The previous code has expired. Generate a new one.</p>':
+    '<div style="border:1px solid #e9e2eb;border-radius:14px;padding:18px;background:#fbf8fc"><div style="font-size:12px;color:#777184">ANNOUNCE THIS CODE TO YOUR CLASS</div><div style="font-size:38px;font-weight:900;letter-spacing:8px;color:#287f83;margin:8px 0">'+s.code+'</div><div style="font-size:13px">'+s.subject+' · '+s.dept+' · '+s.year+' · Section '+s.section+'</div><div style="font-size:12px;color:#777184;margin-top:8px">Date: '+s.date+' · Valid until '+new Date(s.expires).toLocaleTimeString()+'</div></div>';
+ };
+ const form=$id('teacherCodeForm');
+ if(form)form.addEventListener('submit',e=>{
+   e.preventDefault();
+   const subject=$id('codeSubject').value.trim();if(!subject)return;
+   const code=String(Math.floor(100000+Math.random()*900000));
+   const s={code,subject,dept:$id('codeDept').value,year:$id('codeYear').value,section:$id('codeSection').value,date:today(),expires:Date.now()+2*60*60*1000};
+   localStorage.setItem('mits_active_attendance_code',JSON.stringify(s));showCode();toast('Attendance code generated');
+ });
+ const check=$id('studentCodeForm');
+ if(check)check.addEventListener('submit',e=>{
+   e.preventDefault();
+   const roll=$id('checkinRoll').value.trim().toUpperCase(),code=$id('checkinCode').value.trim(),s=readSession(),feedback=$id('checkinFeedback');
+   const student=students.find(x=>String(x.roll).toUpperCase()===roll);
+   if(!s||Date.now()>s.expires||s.date!==today()){feedback.textContent='No active attendance code. Ask your teacher to generate one.';feedback.style.color='#bd5548';return}
+   if(code!==s.code){feedback.textContent='Incorrect attendance code. Please check with your teacher.';feedback.style.color='#bd5548';return}
+   if(!student){feedback.textContent='Roll number not found in the demo student list.';feedback.style.color='#bd5548';return}
+   if(student.dept!==s.dept||student.year!==s.year||student.section!==s.section){feedback.textContent='This code is for a different class. Please check the class details.';feedback.style.color='#bd5548';return}
+   const exists=records.some(x=>x.roll===student.roll&&x.date===s.date&&x.subject===s.subject);
+   if(exists){feedback.textContent='Attendance was already submitted for this subject today.';feedback.style.color='#a87525';return}
+   records.push({...student,date:s.date,status:'Present',subject:s.subject,source:'Student code check-in'});
+   save();renderAll();feedback.textContent='Attendance submitted successfully for '+student.name+'.';feedback.style.color='#287f70';check.reset();toast('Attendance submitted');
+ });
+ showCode();
+})();
+
+
+/* MITS SHARED ATTENDANCE CODE — Supabase demo backend.
+   This is intentionally a temporary anonymous demo. Never use real student data until secure roles/RLS are enabled. */
+(function () {
+ const sb=window.mitsSupabase;
+ const byId=id=>document.getElementById(id);
+ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+ const msg=(el,text,color)=>{if(el){el.textContent=text;el.style.color=color||'#bd5548'}};
+ const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const teacher=byId('teacherCodeForm'), student=byId('studentCodeForm');
+ if(!teacher||!student)return;
+ if(!sb){msg(byId('teacherCodeResult'),'Database connection not loaded. Refresh the page or check your internet.');return;}
+ teacher.addEventListener('submit',async e=>{
+  e.preventDefault();e.stopImmediatePropagation();
+  const box=byId('teacherCodeResult'),subject=byId('codeSubject').value.trim();
+  const code=String(Math.floor(100000+Math.random()*900000));
+  const btn=teacher.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Generating…';
+  try{
+   const {data,error}=await sb.rpc('mits_demo_create_session',{p_code:code,p_subject:subject,p_department:byId('codeDept').value,p_year:byId('codeYear').value,p_section:byId('codeSection').value});
+   if(error)throw error;
+   box.innerHTML='<div style="border:1px solid #b9ded8;border-radius:14px;padding:18px;background:#f1fbf8"><div style="font-size:12px;color:#287f83;font-weight:800">SHARE THIS CODE WITH YOUR CLASS</div><div style="font-size:38px;font-weight:900;letter-spacing:8px;color:#287f83;margin:8px 0">'+escapeHtml(data.code)+'</div><div>'+escapeHtml(data.subject)+' · '+escapeHtml(data.department)+' · '+escapeHtml(data.academic_year)+' · Section '+escapeHtml(data.section)+'</div><p style="font-size:12px;color:#777184">Valid for 2 hours · Shared database connected</p><button type="button" id="mitsRefreshAttendance" class="secondary">Refresh submitted attendance</button><div id="mitsSharedAttendance" style="margin-top:12px"></div></div>';
+   byId('mitsRefreshAttendance').onclick=()=>refresh(code);
+   window.mitsCurrentAttendanceCode=code;
+   if(typeof window.toast==='function')window.toast('Shared attendance code generated');
+  }catch(err){msg(box,err.message||'Could not generate code. Run the Supabase setup SQL first.');}
+  finally{btn.disabled=false;btn.textContent='Generate 6-digit attendance code';}
+ },true);
+ async function refresh(code){
+  const out=byId('mitsSharedAttendance');msg(out,'Loading attendance…','#777184');
+  try{
+   const {data,error}=await sb.rpc('mits_demo_get_attendance',{p_code:code});if(error)throw error;
+   const rows=data.attendance||[];
+   out.innerHTML='<h4 style="margin:12px 0 6px">Submitted: '+rows.length+'</h4>'+(rows.length?'<div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th align="left">Roll no.</th><th align="left">Student</th><th align="left">Status</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+escapeHtml(r.roll_no)+'</td><td>'+escapeHtml(r.full_name)+'</td><td>'+escapeHtml(r.status)+'</td></tr>').join('')+'</tbody></table></div>':'<p>No students have submitted attendance yet.</p>');
+  }catch(err){msg(out,err.message||'Could not load attendance');}
+ }
+ student.addEventListener('submit',async e=>{
+  e.preventDefault();e.stopImmediatePropagation();
+  const feedback=byId('checkinFeedback'),roll=byId('checkinRoll').value.trim().toUpperCase(),code=byId('checkinCode').value.trim();
+  const btn=student.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Submitting…';
+  try{
+   const {data,error}=await sb.rpc('mits_demo_submit_attendance',{p_roll:roll,p_code:code});if(error)throw error;
+   msg(feedback,'Attendance submitted successfully for '+data.name+' ('+data.roll_no+') — '+data.subject,'#287f70');student.reset();
+  }catch(err){msg(feedback,err.message||'Could not submit attendance');}
+  finally{btn.disabled=false;btn.textContent='Submit attendance';}
+ },true);
+})();
+
+
+/* Strictly separate Student, Teacher and Admin workspaces (demo mode). */
+(function(){
+ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+ const permissions={
+  Student:{views:["dashboard","checkin","timetable","notices","leave"],quick:["checkin","notices","leave","timetable"]},
+  Teacher:{views:["dashboard","attendance","teacherCode","students","reports","leave"],quick:["teacherCode","attendance","students","reports","leave"]},
+  Admin:{views:["dashboard","attendance","teacherCode","checkin","students","reports","timetable","notices","leave"],quick:["attendance","teacherCode","checkin","students","reports","notices","leave","timetable"]}
+ };
+ function applyRole(){
+  const current=$("#roleSelect")?.value||"Student",allowed=permissions[current]||permissions.Student;
+  $$(".nav-item").forEach(item=>{item.hidden=!allowed.views.includes(item.dataset.view)});
+  $$("[data-goto]").forEach(item=>{item.hidden=!allowed.quick.includes(item.dataset.goto)});
+  const dashboard=$("#dashboard");
+  if(dashboard){
+   const stats=dashboard.querySelector(".stats"),analytics=dashboard.querySelector(".grid-two"),activity=dashboard.querySelector(":scope > .panel");
+   if(current==="Student"){
+    if(stats)stats.hidden=true;if(analytics)analytics.hidden=true;if(activity)activity.hidden=true;
+    let home=$("#studentDashboardHome");
+    if(!home){
+     home=document.createElement("section");home.id="studentDashboardHome";
+     home.innerHTML='<article class="panel" style="margin-top:18px"><div class="panel-head"><div><h3>Student services</h3><p>Your attendance and campus information.</p></div><span class="tag">STUDENT</span></div><div class="quick-grid"><button data-goto="checkin"><b>✓</b><span>Submit attendance with teacher code</span></button><button data-goto="notices"><b>♢</b><span>View college notices</span></button><button data-goto="leave"><b>✉</b><span>Apply for leave</span></button><button data-goto="timetable"><b>▦</b><span>View timetable</span></button></div></article>';
+     dashboard.appendChild(home);
+     home.querySelectorAll("[data-goto]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.goto)));
+    }
+    home.hidden=false;
+   }else{
+    if(stats)stats.hidden=false;if(analytics)analytics.hidden=false;if(activity)activity.hidden=false;
+    const home=$("#studentDashboardHome");if(home)home.hidden=true;
+   }
+  }
+  const active=$(".view.active");
+  if(active&&!allowed.views.includes(active.id))navigate("dashboard");
+  // Hide dashboard quick-action links not assigned to the selected role.
+  $$("[data-goto]").forEach(item=>{if(!item.closest("#studentDashboardHome"))item.hidden=!allowed.quick.includes(item.dataset.goto)});
+ }
+ const select=$("#roleSelect");
+ if(select){select.addEventListener("change",applyRole);applyRole();}
+ window.mitsApplyRolePermissions=applyRole;
+})();
