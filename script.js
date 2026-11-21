@@ -94,3 +94,50 @@ document.addEventListener('click',function(event){
  });
  showCode();
 })();
+
+
+/* MITS SHARED ATTENDANCE CODE — Supabase demo backend.
+   This is intentionally a temporary anonymous demo. Never use real student data until secure roles/RLS are enabled. */
+(function () {
+ const sb=window.mitsSupabase;
+ const byId=id=>document.getElementById(id);
+ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+ const msg=(el,text,color)=>{if(el){el.textContent=text;el.style.color=color||'#bd5548'}};
+ const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const teacher=byId('teacherCodeForm'), student=byId('studentCodeForm');
+ if(!teacher||!student)return;
+ if(!sb){msg(byId('teacherCodeResult'),'Database connection not loaded. Refresh the page or check your internet.');return;}
+ teacher.addEventListener('submit',async e=>{
+  e.preventDefault();e.stopImmediatePropagation();
+  const box=byId('teacherCodeResult'),subject=byId('codeSubject').value.trim();
+  const code=String(Math.floor(100000+Math.random()*900000));
+  const btn=teacher.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Generating…';
+  try{
+   const {data,error}=await sb.rpc('mits_demo_create_session',{p_code:code,p_subject:subject,p_department:byId('codeDept').value,p_year:byId('codeYear').value,p_section:byId('codeSection').value});
+   if(error)throw error;
+   box.innerHTML='<div style="border:1px solid #b9ded8;border-radius:14px;padding:18px;background:#f1fbf8"><div style="font-size:12px;color:#287f83;font-weight:800">SHARE THIS CODE WITH YOUR CLASS</div><div style="font-size:38px;font-weight:900;letter-spacing:8px;color:#287f83;margin:8px 0">'+escapeHtml(data.code)+'</div><div>'+escapeHtml(data.subject)+' · '+escapeHtml(data.department)+' · '+escapeHtml(data.academic_year)+' · Section '+escapeHtml(data.section)+'</div><p style="font-size:12px;color:#777184">Valid for 2 hours · Shared database connected</p><button type="button" id="mitsRefreshAttendance" class="secondary">Refresh submitted attendance</button><div id="mitsSharedAttendance" style="margin-top:12px"></div></div>';
+   byId('mitsRefreshAttendance').onclick=()=>refresh(code);
+   window.mitsCurrentAttendanceCode=code;
+   if(typeof window.toast==='function')window.toast('Shared attendance code generated');
+  }catch(err){msg(box,err.message||'Could not generate code. Run the Supabase setup SQL first.');}
+  finally{btn.disabled=false;btn.textContent='Generate 6-digit attendance code';}
+ },true);
+ async function refresh(code){
+  const out=byId('mitsSharedAttendance');msg(out,'Loading attendance…','#777184');
+  try{
+   const {data,error}=await sb.rpc('mits_demo_get_attendance',{p_code:code});if(error)throw error;
+   const rows=data.attendance||[];
+   out.innerHTML='<h4 style="margin:12px 0 6px">Submitted: '+rows.length+'</h4>'+(rows.length?'<div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th align="left">Roll no.</th><th align="left">Student</th><th align="left">Status</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+escapeHtml(r.roll_no)+'</td><td>'+escapeHtml(r.full_name)+'</td><td>'+escapeHtml(r.status)+'</td></tr>').join('')+'</tbody></table></div>':'<p>No students have submitted attendance yet.</p>');
+  }catch(err){msg(out,err.message||'Could not load attendance');}
+ }
+ student.addEventListener('submit',async e=>{
+  e.preventDefault();e.stopImmediatePropagation();
+  const feedback=byId('checkinFeedback'),roll=byId('checkinRoll').value.trim().toUpperCase(),code=byId('checkinCode').value.trim();
+  const btn=student.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Submitting…';
+  try{
+   const {data,error}=await sb.rpc('mits_demo_submit_attendance',{p_roll:roll,p_code:code});if(error)throw error;
+   msg(feedback,'Attendance submitted successfully for '+data.name+' ('+data.roll_no+') — '+data.subject,'#287f70');student.reset();
+  }catch(err){msg(feedback,err.message||'Could not submit attendance');}
+  finally{btn.disabled=false;btn.textContent='Submit attendance';}
+ },true);
+})();
