@@ -152,7 +152,7 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 </main></div>
 <div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">Add record</h3><button id="closeModal" class="close">×</button></div><div id="modalBody"></div></div></div>
 <div id="toast" class="toast"></div>
-<script src="script.js?v=localdemo1"></script>
+<script src="script.js?v=localdemo2"></script>
 
 <script>
 /* Direct button action avoids conflicts with older delegated login/signup handlers. */
@@ -199,7 +199,7 @@ window.mitsOpenDashboard = function (selectedRole, event) {
 (function(){
   var map={
     Student:['dashboard','checkin','timetable','notices','leave'],
-    Teacher:['dashboard','attendance','teacherCode','students','reports'],
+    Teacher:['dashboard','attendance','teacherCode','students','reports','notices'],
     Admin:['dashboard','attendance','teacherCode','checkin','students','reports','timetable','notices','leave']
   };
   function enforceRoleMenu(){
