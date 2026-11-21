@@ -11,7 +11,30 @@ function role(){return $('#roleSelect').value}
 function navigate(v){$$('.view').forEach(x=>x.classList.toggle('active',x.id===v));$$('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.view===v));$('#pageTitle').textContent=({dashboard:'Dashboard',attendance:'Attendance',teacherCode:'Teacher: Generate Code',checkin:'Join with Code',students:'Students',reports:'Reports & Analytics',timetable:'Timetable',notices:'Notice board',leave:'Leave requests'})[v];renderAll()}
 $$('.nav-item').forEach(b=>b.onclick=()=>navigate(b.dataset.view));$$('[data-goto]').forEach(b=>b.onclick=()=>navigate(b.dataset.goto));
 $('#roleSelect').onchange=()=>{$('#welcomeRole').textContent=role();$('#avatar').textContent=role()==='Admin'?'AD':role()==='Teacher'?'TR':'ST';renderAll();toast('Viewing '+role()+' demo workspace')};
-function stat(){let today=records.filter(r=>r.date==='2026-11-18'),present=today.filter(r=>r.status==='Present').length;$('#totalStudents').textContent=students.length.toLocaleString();$('#presentToday').textContent=present||Math.round(students.length*.87);$('#absentToday').textContent=today.length?today.length-present:Math.round(students.length*.13);$('#presentPercent').textContent=(today.length?Math.round(present/today.length*100):87)+'% attendance';let depts=departments.map(d=>{let rs=today.filter(r=>r.dept===d);return [d,rs.length?Math.round(rs.filter(r=>r.status==='Present').length/rs.length*100):[91,86,88,82,89][departments.indexOf(d)]]});$('#departmentBars').innerHTML=depts.map(([d,p])=>`<div class="bar-row"><span>${d}</span><div class="bar-track"><div class="bar-fill" style="width:${p}%"></div></div><span class="bar-value">${p}%</span></div>`).join('');let recent=(records.length?records.slice(-5).reverse():students.slice(0,5).map(s=>({...s,date:'18 Nov 2026',status:'Present'})));$('#recentRows').innerHTML=recent.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td>${esc(r.dept)}</td><td>${esc(r.year)}</td><td>${r.date}</td><td>${badge(r.status)}</td></tr>`).join('')}
+function todayISO(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function stat(){
+ const today=todayISO();
+ const todayRecords=records.filter(r=>r.date===today);
+ const present=todayRecords.filter(r=>r.status==='Present').length;
+ const absent=todayRecords.filter(r=>r.status==='Absent').length;
+ const late=todayRecords.filter(r=>r.status==='Late').length;
+ const marked=todayRecords.length;
+ const pct=marked?Math.round((present+late)/marked*100):0;
+ $('#totalStudents').textContent=students.length.toLocaleString();
+ $('#presentToday').textContent=present.toLocaleString();
+ $('#absentToday').textContent=absent.toLocaleString();
+ $('#presentPercent').textContent=marked?pct+'% of marked attendance': 'No attendance marked today';
+ $('#classesToday').textContent=new Set(todayRecords.map(r=>[r.dept,r.year,r.section].join('|'))).size.toLocaleString();
+ $('#classesTodaySub').textContent=marked?new Set(todayRecords.map(r=>r.dept)).size+' departments recorded':'Based on saved attendance';
+ const dateLabel=new Date(today+'T00:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+ const dateNode=$('#dashboardDate');if(dateNode)dateNode.textContent=dateLabel;
+ const depts=departments.map(d=>{const rs=todayRecords.filter(r=>r.dept===d);return [d,rs.length?Math.round(rs.filter(r=>r.status==='Present'||r.status==='Late').length/rs.length*100):0]});
+ $('#departmentBars').innerHTML=depts.map(([d,p])=>`<div class="bar-row"><span>${esc(d)}</span><div class="bar-track"><div class="bar-fill" style="width:${p}%"></div></div><span class="bar-value">${p}%</span></div>`).join('');
+ const recent=records.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,5);
+ $('#recentRows').innerHTML=recent.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td>${esc(r.dept)}</td><td>${esc(r.year)}</td><td>${esc(r.date)}</td><td>${badge(r.status)}</td></tr>`).join('')||'<tr><td colspan="5">No attendance records saved yet.</td></tr>';
+}
+
+$('#attDate').value=todayISO();
 function badge(s){return `<span class="status ${s.toLowerCase()}">${s}</span>`}function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function roster(){let d=$('#attDept').value,y=$('#attYear').value,sec=$('#attSection').value,date=$('#attDate').value,q=$('#studentSearch').value.toLowerCase();let list=students.filter(s=>s.dept===d&&s.year===y&&s.section===sec&&(`${s.name} ${s.roll}`).toLowerCase().includes(q));$('#rosterCount').textContent=`${list.length} students · ${date}`;$('#rosterRows').innerHTML=list.map(s=>{let r=records.find(x=>x.roll===s.roll&&x.date===date);return `<tr><td>${s.roll}</td><td><b>${esc(s.name)}</b></td><td>${s.dept}</td><td>${s.year} · ${s.section}</td><td><select class="attendance-select" data-roll="${s.roll}"><option ${(!r||r.status==='Present')?'selected':''}>Present</option><option ${r?.status==='Absent'?'selected':''}>Absent</option><option ${r?.status==='Late'?'selected':''}>Late</option></select></td></tr>`}).join('')||'<tr><td colspan="5">No students match these filters. Try another year, section or department.</td></tr>'}
 ['#attDept','#attYear','#attSection','#attDate','#studentSearch'].forEach(s=>$(s).addEventListener('input',roster));
