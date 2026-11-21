@@ -52,9 +52,9 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
   <div class="welcome-brand"><img src="mits-logo.png" alt="MITS college logo"><div><span>WELCOME TO</span><h1>MITS <em>Campus Portal</em></h1><p>Majhighariani Institute of Technology and Science</p></div><img class="welcome-deity" src="deity-header.png" alt="College header image"></div>
   <div class="welcome-copy"><span class="welcome-kicker">SMART CAMPUS · SMARTER FUTURE</span><h2>Your campus, <i>connected.</i></h2><p>Attendance, academic updates and campus services — all in one place.</p></div>
   <div class="role-cards">
-   <article><span class="role-symbol">ST</span><h3>Student</h3><p>View attendance and campus notices.</p><button class="portal-signup" data-signup="Student">Student Sign up</button><button class="portal-login" data-enter="Student">Student Login</button></article>
-   <article><span class="role-symbol teacher">TE</span><h3>Teacher</h3><p>Manage class attendance and requests.</p><button class="portal-signup" data-signup="Teacher">Teacher Sign up</button><button class="portal-login" data-enter="Teacher">Teacher Login</button></article>
-   <article><span class="role-symbol admin">AD</span><h3>Admin</h3><p>Access college administration tools.</p><button class="portal-signup admin-request" data-signup="Admin">Request Admin Access</button><button class="portal-login" data-enter="Admin">Admin Login</button></article>
+   <article><span class="role-symbol">ST</span><h3>Student</h3><p>View attendance and campus notices.</p><button class="portal-signup" data-signup="Student" onclick="event.stopPropagation();document.getElementById('roleSelect').value='Student';document.getElementById('welcomeRole').textContent='Student Demo';document.getElementById('avatar').textContent='ST';document.getElementById('portalWelcome').style.display='none'">Student Sign up</button><button class="portal-login" data-enter="Student" onclick="event.stopPropagation();document.getElementById('roleSelect').value='Student';document.getElementById('welcomeRole').textContent='Student Demo';document.getElementById('avatar').textContent='ST';document.getElementById('portalWelcome').style.display='none'">Student Login</button></article>
+   <article><span class="role-symbol teacher">TE</span><h3>Teacher</h3><p>Manage class attendance and requests.</p><button class="portal-signup" data-signup="Teacher" onclick="event.stopPropagation();document.getElementById('roleSelect').value='Teacher';document.getElementById('welcomeRole').textContent='Teacher Demo';document.getElementById('avatar').textContent='TR';document.getElementById('portalWelcome').style.display='none'">Teacher Sign up</button><button class="portal-login" data-enter="Teacher" onclick="event.stopPropagation();document.getElementById('roleSelect').value='Teacher';document.getElementById('welcomeRole').textContent='Teacher Demo';document.getElementById('avatar').textContent='TR';document.getElementById('portalWelcome').style.display='none'">Teacher Login</button></article>
+   <article><span class="role-symbol admin">AD</span><h3>Admin</h3><p>Access college administration tools.</p><button class="portal-signup admin-request" data-signup="Admin" onclick="event.stopPropagation();document.getElementById('roleSelect').value='Admin';document.getElementById('welcomeRole').textContent='Admin Demo';document.getElementById('avatar').textContent='AD';document.getElementById('portalWelcome').style.display='none'">Request Admin Access</button><button class="portal-login" data-enter="Admin" onclick="event.stopPropagation();document.getElementById('roleSelect').value='Admin';document.getElementById('welcomeRole').textContent='Admin Demo';document.getElementById('avatar').textContent='AD';document.getElementById('portalWelcome').style.display='none'">Admin Login</button></article>
   </div>
   <small class="portal-note">Preview portal: registration is a front-end demo only. Secure accounts require Supabase authentication.</small>
  </div>
@@ -66,6 +66,8 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
   <nav>
     <button class="nav-item active" data-view="dashboard">▦ <span>Dashboard</span></button>
     <button class="nav-item" data-view="attendance">◷ <span>Attendance</span></button>
+    <button class="nav-item" data-view="teacherCode">⌁ <span>Teacher: Generate Code</span></button>
+    <button class="nav-item" data-view="checkin">⌁ <span>Join with code</span></button>
     <button class="nav-item" data-view="students">♙ <span>Students</span></button>
     <button class="nav-item" data-view="reports">▤ <span>Reports & Analytics</span></button>
     <button class="nav-item" data-view="timetable">▦ <span>Timetable</span></button>
@@ -88,7 +90,7 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
   </div>
   <div class="grid-two">
     <article class="panel"><div class="panel-head"><div><h3>Attendance by department</h3><p>Today's attendance percentage</p></div><span class="tag">Today</span></div><div id="departmentBars" class="bars"></div></article>
-    <article class="panel"><div class="panel-head"><div><h3>Quick actions</h3><p>Common tasks</p></div></div><div class="quick-grid"><button data-goto="attendance"><b>＋</b><span>Mark attendance</span></button><button data-goto="students"><b>♙</b><span>Add student</span></button><button data-goto="reports"><b>▤</b><span>View reports</span></button><button data-goto="notices"><b>♢</b><span>Post notice</span></button></div></article>
+    <article class="panel"><div class="panel-head"><div><h3>Quick actions</h3><p>Common tasks</p></div></div><div class="quick-grid"><button data-goto="teacherCode"><b>⌁</b><span>Generate attendance code</span></button><button data-goto="checkin"><b>✓</b><span>Student join with code</span></button><button data-goto="attendance"><b>＋</b><span>Mark attendance</span></button><button data-goto="students"><b>♙</b><span>View students</span></button><button data-goto="reports"><b>▤</b><span>View reports</span></button><button data-goto="notices"><b>♢</b><span>Post notice</span></button></div></article>
   </div>
   <article class="panel"><div class="panel-head"><div><h3>Recent attendance activity</h3><p>Latest records entered in this browser</p></div><button class="text-btn" data-goto="attendance">View all →</button></div><div class="table-wrap"><table><thead><tr><th>Student</th><th>Department</th><th>Year</th><th>Date</th><th>Status</th></tr></thead><tbody id="recentRows"></tbody></table></div></article>
 </section>
@@ -103,6 +105,32 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
  </article>
  <div class="attendance-tools"><span id="rosterCount">Showing students</span><div><button class="secondary" id="markAllPresent">Mark all present</button><button class="secondary" id="markAllAbsent">Mark all absent</button></div></div>
  <article class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Roll no.</th><th>Student name</th><th>Department</th><th>Year / Section</th><th>Attendance status</th></tr></thead><tbody id="rosterRows"></tbody></table></div></article>
+</section>
+<section id="teacherCode" class="view">
+ <div class="section-intro"><div><h2>Teacher attendance code</h2><p>Generate a one-time classroom code for students to submit attendance.</p></div></div>
+ <article class="panel" style="max-width:680px">
+  <span class="tag">TEACHER DEMO</span>
+  <form id="teacherCodeForm" style="display:grid;gap:13px;margin-top:15px">
+   <label>Department<select id="codeDept"><option>Computer Science</option><option>Mechanical</option><option>Electrical</option><option>Civil</option><option>Electronics</option></select></label>
+   <label>Academic year<select id="codeYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></label>
+   <label>Section<select id="codeSection"><option>A</option><option>B</option><option>C</option></select></label>
+   <label>Subject<input id="codeSubject" required placeholder="Example: Programming in C"></label>
+   <button class="primary" type="submit">Generate 6-digit attendance code</button>
+  </form>
+  <div id="teacherCodeResult" style="margin-top:16px"></div>
+ </article>
+</section>
+<section id="checkin" class="view">
+ <div class="section-intro"><div><h2>Student attendance check-in</h2><p>Enter your roll number and the code announced by your teacher.</p></div></div>
+ <article class="panel" style="max-width:620px">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:15px"><span class="tag">DEMO CHECK-IN</span><span style="font-size:12px;color:#777184">Shared demo database · works across phones</span></div>
+  <form id="studentCodeForm" style="display:grid;gap:13px">
+   <label>Student roll number<input id="checkinRoll" required placeholder="Example: MITS001" autocomplete="off"></label>
+   <label>Attendance code<input id="checkinCode" required inputmode="numeric" maxlength="6" placeholder="Enter 6-digit teacher code" autocomplete="off"></label>
+   <button class="primary" type="submit">Submit attendance</button>
+  </form>
+  <div id="checkinFeedback" style="margin-top:14px;font-size:13px"></div>
+ </article>
 </section>
 <section id="students" class="view">
  <div class="section-intro"><div><h2>Student directory</h2><p>Manage student records and academic details.</p></div><button class="primary" id="addStudentBtn">＋ Add student</button></div>
@@ -125,86 +153,32 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 <div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">Add record</h3><button id="closeModal" class="close">×</button></div><div id="modalBody"></div></div></div>
 <div id="toast" class="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
-<script src="supabase-client.js"></script>
-<script src="script.js"></script>
+<script src="supabase-config.js?v=20261121"></script>
+<script src="script.js?v=20261121"></script>
+
 <script>
-/* Independent welcome-screen controls: keeps login/signup usable even if dashboard JS has an error. */
-(function () {
-  const welcome = document.getElementById('portalWelcome');
-  const modal = document.getElementById('modal');
-  const title = document.getElementById('modalTitle');
-  const body = document.getElementById('modalBody');
-  const roleSelect = document.getElementById('roleSelect');
-  function showForm(role, mode) {
-    if (!modal || !title || !body) return;
-    const isSignup = mode === 'signup';
-    title.textContent = isSignup
-      ? (role === 'Admin' ? 'Request administrator access' : role + ' sign up')
-      : role + ' login';
-    const identityLabel = role === 'Student' ? 'Email or student roll number' : 'Email address';
-    body.innerHTML = '<form id="welcomeAuthForm" style="display:grid;gap:13px">' +
-      (isSignup ? '<label>Full name<input name="name" required autocomplete="name"></label>' : '') +
-      '<label>' + identityLabel + '<input name="identity" required autocomplete="username"></label>' +
-      (isSignup && role === 'Student' ? '<label>Student roll number<input name="roll" required></label>' : '') +
-      '<label>Password<input name="password" type="password" required minlength="' + (isSignup ? '8' : '1') + '" autocomplete="' + (isSignup ? 'new-password' : 'current-password') + '"></label>' +
-      '<button class="primary" type="submit">' + (isSignup ? (role === 'Admin' ? 'Send access request' : 'Create demo account') : 'Continue to demo') + '</button>' +
-      '<p style="font-size:12px;line-height:1.55;color:#777184;margin:0">Demo preview only. Real accounts and password checks will be enabled after secure Supabase setup. Admin access must be approved privately.</p>' +
-      '</form>';
-    modal.style.zIndex = '10020';
-    modal.classList.add('open');
-    const form = document.getElementById('welcomeAuthForm');
-    form.addEventListener('submit', async function (event) {
-      event.preventDefault();
-      const submit = form.querySelector('button[type="submit"]');
-      if (isSignup) {
-        alert(role === 'Admin' ? 'Admin accounts are created only by an authorized MITS administrator.' : 'Self-registration is disabled. Ask the MITS administrator to create your account.');
-        return;
-      }
-      if (!window.MITSAuth || !window.MITSAuth.ready) {
-        alert('Secure login is not configured yet. Please contact the MITS administrator.');
-        return;
-      }
-      const identity = form.elements.identity.value.trim();
-      const password = form.elements.password.value;
-      if (!identity.includes('@')) {
-        alert('Please enter the email address registered with your MITS account.');
-        return;
-      }
-      submit.disabled = true;
-      submit.textContent = 'Signing in…';
-      try {
-        const result = await window.MITSAuth.signIn(identity, password);
-        const actualRole = result.profile.role;
-        if (actualRole !== role.toLowerCase()) {
-          await window.MITSAuth.signOut();
-          throw new Error('This account is registered as ' + actualRole + ', not ' + role.toLowerCase() + '. Choose the correct login.');
-        }
-        if (roleSelect) roleSelect.value = role;
-        const welcomeRole = document.getElementById('welcomeRole');
-        const avatar = document.getElementById('avatar');
-        if (welcomeRole) welcomeRole.textContent = result.profile.full_name || role;
-        if (avatar) avatar.textContent = role === 'Admin' ? 'AD' : role === 'Teacher' ? 'TR' : 'ST';
-        modal.classList.remove('open');
-        if (welcome) welcome.style.display = 'none';
-        window.MITS_CURRENT_PROFILE = result.profile;
-        window.dispatchEvent(new CustomEvent('mits:authenticated', { detail: result.profile }));
-      } catch (error) {
-        alert(error.message || 'Unable to sign in. Check your details and try again.');
-      } finally {
-        submit.disabled = false;
-        submit.textContent = 'Continue to secure portal';
-      }
-    });
+/* Direct button action avoids conflicts with older delegated login/signup handlers. */
+window.mitsOpenDashboard = function (selectedRole, event) {
+  if (event) { event.preventDefault(); event.stopPropagation(); }
+  var roleSelect = document.getElementById('roleSelect');
+  if (roleSelect) {
+    roleSelect.value = selectedRole;
+    roleSelect.dispatchEvent(new Event('change', { bubbles: true }));
   }
-  document.addEventListener('click', function (event) {
-    const button = event.target.closest('[data-enter], [data-signup]');
-    if (!button) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    const role = button.getAttribute('data-enter') || button.getAttribute('data-signup');
-    showForm(role, button.hasAttribute('data-signup') ? 'signup' : 'login');
-  }, true);
-})();
+  var welcomeRole = document.getElementById('welcomeRole');
+  var avatar = document.getElementById('avatar');
+  var welcome = document.getElementById('portalWelcome');
+  if (welcomeRole) welcomeRole.textContent = selectedRole + ' Demo';
+  if (avatar) avatar.textContent = selectedRole === 'Admin' ? 'AD' : selectedRole === 'Teacher' ? 'TR' : 'ST';
+  if (welcome) welcome.style.display = 'none';
+  var warning = document.getElementById('mitsOpenDemoWarning');
+  if (!warning) {
+    warning = document.createElement('div');
+    warning.id = 'mitsOpenDemoWarning';
+    warning.style.cssText = 'position:relative;z-index:10030;padding:10px 14px;background:#fff1cc;color:#704d00;text-align:center;font-size:12px;font-weight:700';
+    warning.textContent = 'OPEN DEMO MODE — login and signup are bypassed. Do not enter real student data.';
+    document.body.insertBefore(warning, document.body.firstChild);
+  }
+};
 </script>
 </body></html>
