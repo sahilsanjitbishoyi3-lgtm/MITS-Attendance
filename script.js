@@ -24,7 +24,33 @@ function reports(){let d=$('#reportDept').value,y=$('#reportYear').value,from=$(
 function noticeRender(){$('#noticeList').innerHTML=notices.slice().reverse().map(n=>`<article class="notice"><h3>${esc(n.title)}</h3><p>${esc(n.body)}</p><small>Published · ${n.date}</small></article>`).join('')}
 function leaveRender(){$('#leaveRows').innerHTML=leaves.map((l,i)=>`<tr><td>${esc(l.student)}</td><td>${l.from}</td><td>${l.to}</td><td>${esc(l.reason)}</td><td>${badge(l.status)}</td><td>${role()==='Admin'||role()==='Teacher'?`<button class="text-btn" onclick="updateLeave(${i},'Approved')">Approve</button> <button class="text-btn" onclick="updateLeave(${i},'Rejected')">Reject</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="6">No leave requests submitted.</td></tr>'}
 window.updateLeave=(i,s)=>{leaves[i].status=s;save();leaveRender();toast('Leave request '+s.toLowerCase())};
-function renderAll(){stat();roster();directory();reports();noticeRender();leaveRender()}
+function studentReportRender(){
+ const out=$('#studentReportResult');if(!out)return;
+ const roll=($('#myReportRoll')?.value||'').trim().toUpperCase();
+ if(!roll){out.innerHTML='';return}
+ const student=students.find(s=>String(s.roll).toUpperCase()===roll);
+ if(!student){out.innerHTML='<article class="panel"><p>No student found with that roll number. Please check and try again.</p></article>';return}
+ const mine=records.filter(r=>String(r.roll).toUpperCase()===roll).sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+ if(!mine.length){out.innerHTML='<article class="panel"><h3>'+esc(student.name)+' · '+esc(student.roll)+'</h3><p>No attendance has been recorded for this roll number yet.</p></article>';return}
+ const present=mine.filter(r=>r.status==='Present'||r.status==='Late').length;
+ const absent=mine.filter(r=>r.status==='Absent').length;
+ const pct=Math.round(present/mine.length*100);
+ const subjects={};mine.forEach(r=>{const key=r.subject||'General / Register';subjects[key]??={total:0,present:0};subjects[key].total++;if(r.status==='Present'||r.status==='Late')subjects[key].present++});
+ out.innerHTML=`<div class="panel" style="margin-bottom:14px"><h3>${esc(student.name)} · ${esc(student.roll)}</h3><p>${esc(student.dept)} · ${esc(student.year)} · Section ${esc(student.section)}</p></div>
+ <div class="stats report-stats">
+  <article class="stat-card"><div class="stat-label">Total records</div><strong>${mine.length}</strong></article>
+  <article class="stat-card"><div class="stat-label">Present / Late</div><strong>${present}</strong></article>
+  <article class="stat-card"><div class="stat-label">Absent</div><strong>${absent}</strong></article>
+  <article class="stat-card"><div class="stat-label">Attendance percentage</div><strong>${pct}%</strong><small>${pct>=75?'Meeting 75% benchmark':'Below 75% benchmark'}</small></article>
+ </div>
+ <article class="panel" style="margin-bottom:14px"><div class="panel-head"><div><h3>Subject-wise analytics</h3><p>Present or Late divided by recorded sessions</p></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Subject</th><th>Sessions</th><th>Present / Late</th><th>Attendance</th></tr></thead><tbody>${Object.entries(subjects).map(([name,v])=>{const p=Math.round(v.present/v.total*100);return `<tr><td>${esc(name)}</td><td>${v.total}</td><td>${v.present}</td><td><b>${p}%</b><div class="bar-track" style="margin-top:6px"><div class="bar-fill" style="width:${p}%"></div></div></td></tr>`}).join('')}</tbody></table></div>
+ </article>
+ <article class="panel"><div class="panel-head"><div><h3>Attendance history</h3><p>Your saved attendance records</p></div></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Subject</th><th>Status</th></tr></thead><tbody>${mine.slice().reverse().map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(r.subject||'General / Register')}</td><td>${badge(r.status)}</td></tr>`).join('')}</tbody></table></div></article>`;
+}
+$('#studentReportForm').addEventListener('submit',e=>{e.preventDefault();studentReportRender()});
+
+function renderAll(){stat();roster();directory();reports();studentReportRender();noticeRender();leaveRender()}
 function openModal(title,html,handler){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=html;$('#modal').classList.add('open');$('#modalBody form').onsubmit=e=>{e.preventDefault();handler(new FormData(e.target));$('#modal').classList.remove('open')}}
 $('#closeModal').onclick=()=>$('#modal').classList.remove('open');$('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').classList.remove('open')};
 $('#addStudentBtn').onclick=()=>openModal('Add student',`<form><label>Student full name<input name="name" required></label><label>Roll number<input name="roll" required></label><label>Department<select name="dept">${departments.map(d=>`<option>${d}</option>`)}</select></label><label>Academic year<select name="year">${['1st Year','2nd Year','3rd Year','4th Year'].map(x=>`<option>${x}</option>`)}</select></label><label>Section<select name="section"><option>A</option><option>B</option><option>C</option></select></label><label>Contact number<input name="phone" inputmode="numeric"></label><button class="primary">Save student</button></form>`,f=>{if(students.some(s=>s.roll===f.get('roll'))){toast('Roll number already exists');return}students.push(Object.fromEntries(['name','roll','dept','year','section','phone'].map(k=>[k,f.get(k)])));save();renderAll();toast('Student added')});
@@ -100,7 +126,7 @@ document.addEventListener('click',function(event){
 /* Local-only demo role workspaces. */
 (function(){
  const allowed={
-  Student:["dashboard","checkin","timetable","notices","leave"],
+  Student:["dashboard","checkin","studentReport","timetable","notices","leave"],
   Teacher:["dashboard","attendance","teacherCode","students","reports","notices","leave"],
   Admin:["dashboard","attendance","teacherCode","checkin","students","reports","timetable","notices","leave"]
  };
