@@ -123,7 +123,7 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 <section id="checkin" class="view">
  <div class="section-intro"><div><h2>Student attendance check-in</h2><p>Enter your roll number and the code announced by your teacher.</p></div></div>
  <article class="panel" style="max-width:620px">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:15px"><span class="tag">DEMO CHECK-IN</span><span style="font-size:12px;color:#777184">Sample data · same browser only</span></div>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:15px"><span class="tag">DEMO CHECK-IN</span><span style="font-size:12px;color:#777184">Shared demo database · works across phones</span></div>
   <form id="studentCodeForm" style="display:grid;gap:13px">
    <label>Student roll number<input id="checkinRoll" required placeholder="Example: MITS001" autocomplete="off"></label>
    <label>Attendance code<input id="checkinCode" required inputmode="numeric" maxlength="6" placeholder="Enter 6-digit teacher code" autocomplete="off"></label>
@@ -152,7 +152,9 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 </main></div>
 <div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">Add record</h3><button id="closeModal" class="close">×</button></div><div id="modalBody"></div></div></div>
 <div id="toast" class="toast"></div>
-<script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js?v=20261121"></script>
+<script src="script.js?v=20261121"></script>
 
 <script>
 /* Direct button action avoids conflicts with older delegated login/signup handlers. */
