@@ -153,8 +153,8 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 <div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">Add record</h3><button id="closeModal" class="close">×</button></div><div id="modalBody"></div></div></div>
 <div id="toast" class="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js?v=20261121c"></script>
-<script src="script.js?v=20261121c"></script>
+<script src="supabase-config.js?v=20261121d"></script>
+<script src="script.js?v=20261121d"></script>
 
 <script>
 /* Direct button action avoids conflicts with older delegated login/signup handlers. */
@@ -194,6 +194,34 @@ window.mitsOpenDashboard = function (selectedRole, event) {
     });
   }
   window.addEventListener('pageshow',closeAuthPrompt);
+})();
+</script>
+<script>
+/* Last-loaded role menu guard: runs after the portal scripts and CSS. */
+(function(){
+  var map={
+    Student:['dashboard','checkin','timetable','notices','leave'],
+    Teacher:['dashboard','attendance','teacherCode','students','reports'],
+    Admin:['dashboard','attendance','teacherCode','checkin','students','reports','timetable','notices','leave']
+  };
+  function enforceRoleMenu(){
+    var picker=document.getElementById('roleSelect');
+    var role=picker?picker.value:'Student';
+    var allowed=map[role]||map.Student;
+    document.querySelectorAll('.sidebar .nav-item[data-view]').forEach(function(node){
+      node.style.display=allowed.indexOf(node.getAttribute('data-view'))!==-1?'flex':'none';
+    });
+    var current=document.querySelector('.view.active');
+    if(current&&allowed.indexOf(current.id)===-1){
+      document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('active',v.id==='dashboard');});
+      var title=document.getElementById('pageTitle');if(title)title.textContent='Dashboard';
+      document.querySelectorAll('.sidebar .nav-item').forEach(function(n){n.classList.toggle('active',n.dataset.view==='dashboard');});
+    }
+  }
+  var picker=document.getElementById('roleSelect');
+  if(picker)picker.addEventListener('change',enforceRoleMenu);
+  enforceRoleMenu();
+  window.addEventListener('pageshow',enforceRoleMenu);
 })();
 </script>
 </body></html>
