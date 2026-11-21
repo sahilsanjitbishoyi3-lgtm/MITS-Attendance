@@ -153,8 +153,8 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 <div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">Add record</h3><button id="closeModal" class="close">×</button></div><div id="modalBody"></div></div></div>
 <div id="toast" class="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js?v=20261121"></script>
-<script src="script.js?v=20261121"></script>
+<script src="supabase-config.js?v=20261121c"></script>
+<script src="script.js?v=20261121c"></script>
 
 <script>
 /* Direct button action avoids conflicts with older delegated login/signup handlers. */
@@ -180,5 +180,20 @@ window.mitsOpenDashboard = function (selectedRole, event) {
     document.body.insertBefore(warning, document.body.firstChild);
   }
 };
+</script>
+<script>
+/* Demo preview: never ask for Supabase credentials on the public preview. */
+(function(){
+  function closeAuthPrompt(){
+    document.querySelectorAll('form').forEach(function(form){
+      var text=(form.innerText||'').toLowerCase();
+      if(text.includes('signing in')||text.includes('sign in')||text.includes('login')){
+        var modal=form.closest('.modal-backdrop,.auth-modal,.login-modal,[role="dialog"]');
+        if(modal) modal.classList.remove('open');
+      }
+    });
+  }
+  window.addEventListener('pageshow',closeAuthPrompt);
+})();
 </script>
 </body></html>
