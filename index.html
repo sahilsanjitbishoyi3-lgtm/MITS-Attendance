@@ -82,12 +82,12 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 <div class="topbar-right"><img class="deity-header" src="deity-header.png" alt="Deity image"><div class="top-actions"><select id="roleSelect" aria-label="Choose role"><option>Admin</option><option>Teacher</option><option>Student</option></select><div class="avatar" id="avatar">AD</div></div></div></header>
 <div class="content">
 <section id="dashboard" class="view active">
-  <div class="welcome"><div><div class="eyebrow light">WEDNESDAY, 18 NOVEMBER 2026</div><h2>Good evening, <span id="welcomeRole">Admin</span> 👋</h2><p>Here’s your college attendance overview for today.</p></div><div class="welcome-icon">✦</div></div>
+  <div class="welcome"><div><div class="eyebrow light"><span id="dashboardDate">TODAY</span></div><h2>Good evening, <span id="welcomeRole">Admin</span> 👋</h2><p>Here’s your college attendance overview for today.</p></div><div class="welcome-icon">✦</div></div>
   <div class="stats">
     <article class="stat-card"><span class="stat-icon blue">♙</span><div class="stat-label">Total students</div><strong id="totalStudents">1,248</strong><small class="positive">Across all departments</small></article>
     <article class="stat-card"><span class="stat-icon green">✓</span><div class="stat-label">Present today</div><strong id="presentToday">1,086</strong><small class="positive" id="presentPercent">87.0% attendance</small></article>
     <article class="stat-card"><span class="stat-icon orange">◷</span><div class="stat-label">Absent today</div><strong id="absentToday">162</strong><small>Needs follow-up</small></article>
-    <article class="stat-card"><span class="stat-icon purple">▤</span><div class="stat-label">Classes today</div><strong>32</strong><small>Across 8 departments</small></article>
+    <article class="stat-card"><span class="stat-icon purple">▤</span><div class="stat-label">Classes today</div><strong id="classesToday">0</strong><small id="classesTodaySub">Based on saved attendance</small></article>
   </div>
   <div class="grid-two">
     <article class="panel"><div class="panel-head"><div><h3>Attendance by department</h3><p>Today's attendance percentage</p></div><span class="tag">Today</span></div><div id="departmentBars" class="bars"></div></article>
@@ -101,7 +101,7 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
   <label>Department<select id="attDept"><option>Computer Science</option><option>Mechanical</option><option>Electrical</option><option>Civil</option><option>Electronics</option></select></label>
   <label>Academic year<select id="attYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></label>
   <label>Section<select id="attSection"><option>A</option><option>B</option><option>C</option></select></label>
-  <label>Date<input type="date" id="attDate" value="2026-11-18"></label>
+  <label>Date<input type="date" id="attDate"></label>
   <label class="search-label">Search student<input id="studentSearch" placeholder="Name or roll number"></label>
  </article>
  <div class="attendance-tools"><span id="rosterCount">Showing students</span><div><button class="secondary" id="markAllPresent">Mark all present</button><button class="secondary" id="markAllAbsent">Mark all absent</button></div></div>
@@ -164,7 +164,7 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 </main></div>
 <div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">Add record</h3><button id="closeModal" class="close">×</button></div><div id="modalBody"></div></div></div>
 <div id="toast" class="toast"></div>
-<script src="script.js?v=localdemo3"></script>
+<script src="script.js?v=localdemo4"></script>
 
 <script>
 /* Direct button action avoids conflicts with older delegated login/signup handlers. */
