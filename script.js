@@ -8,7 +8,7 @@ let students=get('students',seed), records=get('records',[]), notices=get('notic
 function save(){localStorage.setItem('mits_students',JSON.stringify(students));localStorage.setItem('mits_records',JSON.stringify(records));localStorage.setItem('mits_notices',JSON.stringify(notices));localStorage.setItem('mits_leaves',JSON.stringify(leaves))}
 function toast(m){let t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2300)}
 function role(){return $('#roleSelect').value}
-function navigate(v){$('.view').forEach(x=>x.classList.toggle('active',x.id===v));$('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.view===v));$('#pageTitle').textContent=({dashboard:'Dashboard',attendance:'Attendance',teacherCode:'Teacher: Generate Code',checkin:'Join with Code',students:'Students',reports:'Reports & Analytics',timetable:'Timetable',notices:'Notice board',leave:'Leave requests'})[v];renderAll()}
+function navigate(v){$$('.view').forEach(x=>x.classList.toggle('active',x.id===v));$$('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.view===v));$('#pageTitle').textContent=({dashboard:'Dashboard',attendance:'Attendance',teacherCode:'Teacher: Generate Code',checkin:'Join with Code',students:'Students',reports:'Reports & Analytics',timetable:'Timetable',notices:'Notice board',leave:'Leave requests'})[v];renderAll()}
 function applyRolePermissions(){
  const current=$('#roleSelect').value;
  const permissions={
