@@ -68,6 +68,7 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
     <button class="nav-item" data-view="attendance">◷ <span>Attendance</span></button>
     <button class="nav-item" data-view="teacherCode">⌁ <span>Teacher: Generate Code</span></button>
     <button class="nav-item" data-view="checkin">⌁ <span>Join with code</span></button>
+    <button class="nav-item" data-view="myReport">▤ <span>My Attendance Report</span></button>
     <button class="nav-item" data-view="students">♙ <span>Students</span></button>
     <button class="nav-item" data-view="reports">▤ <span>Reports & Analytics</span></button>
     <button class="nav-item" data-view="timetable">▦ <span>Timetable</span></button>
@@ -144,6 +145,20 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
  <div class="stats report-stats"><article class="stat-card"><div class="stat-label">Recorded sessions</div><strong id="reportSessions">0</strong></article><article class="stat-card"><div class="stat-label">Present records</div><strong id="reportPresent">0</strong></article><article class="stat-card"><div class="stat-label">Average attendance</div><strong id="reportAverage">—</strong></article></div>
  <article class="panel"><div class="panel-head"><div><h3>Student attendance summary</h3><p>Attendance percentage from saved register entries</p></div></div><div class="table-wrap"><table><thead><tr><th>Roll no.</th><th>Student</th><th>Sessions</th><th>Present</th><th>Attendance</th><th>Indicator</th></tr></thead><tbody id="reportRows"></tbody></table></div></article>
 </section>
+<section id="myReport" class="view">
+ <div class="section-intro"><div><h2>My Attendance & Analytics</h2><p>Check your own attendance percentage, present days and daily records.</p></div></div>
+ <article class="panel">
+  <div class="panel-head"><div><h3>Find my attendance</h3><p>Enter your college roll number to load your report.</p></div></div>
+  <form id="myReportForm" class="filters"><label>My roll number<input id="myReportRoll" required autocomplete="off" placeholder="Example: MITS001"></label><button class="primary" type="submit">View my report</button></form>
+  <p class="hint">Demo mode: this report uses attendance records saved in this browser. Secure student-only access requires individual student sign-in.</p>
+ </article>
+ <div class="stats report-stats">
+  <article class="stat-card"><div class="stat-label">Total classes</div><strong id="myReportTotal">—</strong></article>
+  <article class="stat-card"><div class="stat-label">Present / Late</div><strong id="myReportPresent">—</strong></article>
+  <article class="stat-card"><div class="stat-label">Attendance</div><strong id="myReportPercent">—</strong></article>
+ </div>
+ <article class="panel"><div class="panel-head"><div><h3>My attendance history</h3><p id="myReportStudent">Enter your roll number above to view your records.</p></div></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Subject</th><th>Status</th></tr></thead><tbody id="myReportRows"><tr><td colspan="3">No student selected.</td></tr></tbody></table></div></article>
+</section>
 <section id="timetable" class="view"><div class="section-intro"><div><h2>Class timetable</h2><p>Sample weekly schedule · customize for your departments.</p></div></div><article class="panel table-panel"><div class="table-wrap"><table class="timetable"><thead><tr><th>Time</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr></thead><tbody><tr><th>9:00–10:00</th><td>Mathematics</td><td>Programming</td><td>Physics</td><td>Electrical</td><td>English</td></tr><tr><th>10:00–11:00</th><td>Programming</td><td>Physics</td><td>Mathematics</td><td>Workshop</td><td>Programming</td></tr><tr><th>11:15–12:15</th><td>Digital Logic</td><td>English</td><td>Programming Lab</td><td>Mathematics</td><td>Physics</td></tr><tr><th>1:00–2:00</th><td>Library</td><td>Workshop</td><td>Digital Logic</td><td>Programming</td><td>Sports</td></tr></tbody></table></div></article></section>
 <section id="notices" class="view"><div class="section-intro"><div><h2>Notice board</h2><p>College announcements and academic updates.</p></div><button class="primary" id="addNoticeBtn">＋ Publish notice</button></div><div id="noticeList" class="notice-list"></div></section>
 <section id="leave" class="view"><div class="section-intro"><div><h2>Leave requests</h2><p>Submit and review student leave applications.</p></div><button class="primary" id="newLeaveBtn">＋ Apply for leave</button></div><article class="panel"><div class="table-wrap"><table><thead><tr><th>Student</th><th>From</th><th>To</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead><tbody id="leaveRows"></tbody></table></div></article></section>
@@ -154,7 +169,7 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 <div id="toast" class="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=20261121"></script>
-<script src="script.js?v=20261121-rolefix-verified2"></script>
+<script src="script.js?v=20261121-student-report1"></script>
 
 
 </body></html>
