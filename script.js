@@ -96,79 +96,38 @@ document.addEventListener('click',function(event){
 })();
 
 
-/* MITS SHARED ATTENDANCE CODE — Supabase demo backend.
-   This is intentionally a temporary anonymous demo. Never use real student data until secure roles/RLS are enabled. */
-(function () {
- const sb=window.mitsSupabase;
- const byId=id=>document.getElementById(id);
- const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
- const msg=(el,text,color)=>{if(el){el.textContent=text;el.style.color=color||'#bd5548'}};
- const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const teacher=byId('teacherCodeForm'), student=byId('studentCodeForm');
- if(!teacher||!student)return;
- if(!sb){msg(byId('teacherCodeResult'),'Database connection not loaded. Refresh the page or check your internet.');return;}
- teacher.addEventListener('submit',async e=>{
-  e.preventDefault();e.stopImmediatePropagation();
-  const box=byId('teacherCodeResult'),subject=byId('codeSubject').value.trim();
-  const code=String(Math.floor(100000+Math.random()*900000));
-  const btn=teacher.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Generating…';
-  try{
-   const {data,error}=await sb.rpc('mits_demo_create_session',{p_code:code,p_subject:subject,p_department:byId('codeDept').value,p_year:byId('codeYear').value,p_section:byId('codeSection').value});
-   if(error)throw error;
-   box.innerHTML='<div style="border:1px solid #b9ded8;border-radius:14px;padding:18px;background:#f1fbf8"><div style="font-size:12px;color:#287f83;font-weight:800">SHARE THIS CODE WITH YOUR CLASS</div><div style="font-size:38px;font-weight:900;letter-spacing:8px;color:#287f83;margin:8px 0">'+escapeHtml(data.code)+'</div><div>'+escapeHtml(data.subject)+' · '+escapeHtml(data.department)+' · '+escapeHtml(data.academic_year)+' · Section '+escapeHtml(data.section)+'</div><p style="font-size:12px;color:#777184">Valid for 2 hours · Shared database connected</p><button type="button" id="mitsRefreshAttendance" class="secondary">Refresh submitted attendance</button><div id="mitsSharedAttendance" style="margin-top:12px"></div></div>';
-   byId('mitsRefreshAttendance').onclick=()=>refresh(code);
-   window.mitsCurrentAttendanceCode=code;
-   if(typeof window.toast==='function')window.toast('Shared attendance code generated');
-  }catch(err){msg(box,err.message||'Could not generate code. Run the Supabase setup SQL first.');}
-  finally{btn.disabled=false;btn.textContent='Generate 6-digit attendance code';}
- },true);
- async function refresh(code){
-  const out=byId('mitsSharedAttendance');msg(out,'Loading attendance…','#777184');
-  try{
-   const {data,error}=await sb.rpc('mits_demo_get_attendance',{p_code:code});if(error)throw error;
-   const rows=data.attendance||[];
-   out.innerHTML='<h4 style="margin:12px 0 6px">Submitted: '+rows.length+'</h4>'+(rows.length?'<div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th align="left">Roll no.</th><th align="left">Student</th><th align="left">Status</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+escapeHtml(r.roll_no)+'</td><td>'+escapeHtml(r.full_name)+'</td><td>'+escapeHtml(r.status)+'</td></tr>').join('')+'</tbody></table></div>':'<p>No students have submitted attendance yet.</p>');
-  }catch(err){msg(out,err.message||'Could not load attendance');}
- }
- student.addEventListener('submit',async e=>{
-  e.preventDefault();e.stopImmediatePropagation();
-  const feedback=byId('checkinFeedback'),roll=byId('checkinRoll').value.trim().toUpperCase(),code=byId('checkinCode').value.trim();
-  const btn=student.querySelector('button[type=submit]');btn.disabled=true;btn.textContent='Submitting…';
-  try{
-   const {data,error}=await sb.rpc('mits_demo_submit_attendance',{p_roll:roll,p_code:code});if(error)throw error;
-   msg(feedback,'Attendance submitted successfully for '+data.name+' ('+data.roll_no+') — '+data.subject,'#287f70');student.reset();
-  }catch(err){msg(feedback,err.message||'Could not submit attendance');}
-  finally{btn.disabled=false;btn.textContent='Submit attendance';}
- },true);
-})();
 
-
-/* Role-specific navigation visibility. Use inline !important because .nav-item CSS sets display:flex. */
+/* Local-only demo role workspaces. */
 (function(){
- const rules={
+ const allowed={
   Student:["dashboard","checkin","timetable","notices","leave"],
-  Teacher:["dashboard","attendance","teacherCode","students","reports"],
+  Teacher:["dashboard","attendance","teacherCode","students","reports","leave"],
   Admin:["dashboard","attendance","teacherCode","checkin","students","reports","timetable","notices","leave"]
  };
  function apply(){
-  const role=document.getElementById('roleSelect')?.value||'Student';
-  const allowed=rules[role]||rules.Student;
-  document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
-   el.style.setProperty('display',allowed.includes(el.dataset.view)?'flex':'none','important');
+  const picker=document.getElementById('roleSelect');
+  const currentRole=picker?picker.value:'Student';
+  const views=allowed[currentRole]||allowed.Student;
+  document.querySelectorAll('.sidebar .nav-item[data-view]').forEach(node=>{
+   node.style.setProperty('display',views.includes(node.dataset.view)?'flex':'none','important');
   });
-  document.querySelectorAll('[data-goto]').forEach(el=>{
-   const key=el.dataset.goto;
-   const show=allowed.includes(key);
-   el.style.setProperty('display',show?'':'none','important');
+  document.querySelectorAll('.quick-grid [data-goto], [data-goto].text-btn').forEach(node=>{
+   node.style.setProperty('display',views.includes(node.dataset.goto)?'':'none','important');
   });
   const active=document.querySelector('.view.active');
-  if(active&&!allowed.includes(active.id)){
-   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='dashboard'));
-   document.querySelectorAll('.nav-item').forEach(v=>v.classList.toggle('active',v.dataset.view==='dashboard'));
-   const title=document.getElementById('pageTitle');if(title)title.textContent='Dashboard';
+  if(active&&!views.includes(active.id))navigate('dashboard');
+  const dashboard=document.getElementById('dashboard');
+  if(dashboard){
+   const stats=dashboard.querySelector('.stats');
+   const analytics=dashboard.querySelector('.grid-two');
+   const activity=dashboard.querySelector(':scope > .panel');
+   [stats,analytics,activity].forEach(el=>{if(el)el.style.display=currentRole==='Student'?'none':'';});
   }
+  const checkinHint=document.querySelector('#checkin .panel > div[style*="display:flex"]');
+  if(checkinHint)checkinHint.innerHTML='<span class="tag">LOCAL DEMO</span><span style="font-size:12px;color:#777184">Attendance is saved only in this browser.</span>';
  }
- const select=document.getElementById('roleSelect');
- if(select){select.addEventListener('change',apply);apply();}
+ const picker=document.getElementById('roleSelect');
+ if(picker)picker.addEventListener('change',apply);
  window.mitsApplyRolePermissions=apply;
+ apply();
 })();
