@@ -277,3 +277,17 @@ footer{font-size:11px;background:#f7f3f8;border-color:#e9e2eb}
 
 /* Critical: enforce the HTML hidden attribute over component display rules. */
 [hidden]{display:none!important}
+
+/* Functional attendance forms and action feedback */
+.teacher-code-form{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.teacher-code-form label{display:grid;gap:7px;font-size:13px;font-weight:700;color:#51445c}
+.teacher-code-form input,.teacher-code-form select{width:100%;min-width:0;padding:12px 13px;border:1px solid #e5dce8;border-radius:10px;background:#fff;font:inherit;color:#302044}
+.teacher-code-form input:focus,.teacher-code-form select:focus{outline:2px solid #b7d9d5;outline-offset:1px}
+.teacher-code-form button{grid-column:1/-1;min-height:46px}
+.attendance-code-result{padding:18px;border:1px solid #dce9e4;border-radius:14px;background:#f8fcf9;overflow-wrap:anywhere}
+.attendance-code-result .code-number{font:800 42px 'Space Grotesk',sans-serif;letter-spacing:9px;color:#287f83;margin:12px 0}
+.attendance-code-result p{font-size:12px;color:#6e7d74;margin:8px 0}
+#leaveRows .text-btn{padding:7px 9px;border-radius:8px;background:#f1f7ee;margin:2px}
+#leaveRows .text-btn:hover{background:#e1efda}
+button:disabled{opacity:.65;cursor:wait}
+@media(max-width:700px){.teacher-code-form{grid-template-columns:1fr}.teacher-code-form button{grid-column:auto}.attendance-code-result .code-number{font-size:34px;letter-spacing:6px}}
