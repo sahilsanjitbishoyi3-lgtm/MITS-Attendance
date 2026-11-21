@@ -8,9 +8,46 @@ let students=get('students',seed), records=get('records',[]), notices=get('notic
 function save(){localStorage.setItem('mits_students',JSON.stringify(students));localStorage.setItem('mits_records',JSON.stringify(records));localStorage.setItem('mits_notices',JSON.stringify(notices));localStorage.setItem('mits_leaves',JSON.stringify(leaves))}
 function toast(m){let t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2300)}
 function role(){return $('#roleSelect').value}
-function navigate(v){$$('.view').forEach(x=>x.classList.toggle('active',x.id===v));$$('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.view===v));$('#pageTitle').textContent=({dashboard:'Dashboard',attendance:'Attendance',teacherCode:'Teacher: Generate Code',checkin:'Join with Code',students:'Students',reports:'Reports & Analytics',timetable:'Timetable',notices:'Notice board',leave:'Leave requests'})[v];renderAll()}
+function navigate(v){$('.view').forEach(x=>x.classList.toggle('active',x.id===v));$('.nav-item').forEach(x=>x.classList.toggle('active',x.dataset.view===v));$('#pageTitle').textContent=({dashboard:'Dashboard',attendance:'Attendance',teacherCode:'Teacher: Generate Code',checkin:'Join with Code',students:'Students',reports:'Reports & Analytics',timetable:'Timetable',notices:'Notice board',leave:'Leave requests'})[v];renderAll()}
+function applyRolePermissions(){
+ const current=$('#roleSelect').value;
+ const permissions={
+  Student:{views:['dashboard','checkin','timetable','notices','leave'],quick:['checkin','notices','leave','timetable']},
+  Teacher:{views:['dashboard','attendance','teacherCode','students','reports','leave'],quick:['teacherCode','attendance','students','reports','leave']},
+  Admin:{views:['dashboard','attendance','teacherCode','checkin','students','reports','timetable','notices','leave'],quick:['attendance','teacherCode','checkin','students','reports','notices','leave','timetable']}
+ };
+ const allowed=permissions[current]||permissions.Admin;
+ $('.nav-item').forEach(el=>{el.hidden=!allowed.views.includes(el.dataset.view)});
+ const dashboard=$('#dashboard');
+ if(dashboard){
+  const stats=dashboard.querySelector('.stats');
+  const analytics=dashboard.querySelector('.grid-two');
+  const activity=dashboard.querySelector(':scope > .panel');
+  [stats,analytics,activity].forEach(el=>{if(el)el.hidden=current==='Student'});
+  let studentHome=$('#studentDashboardHome');
+  if(current==='Student'){
+   if(!studentHome){
+    studentHome=document.createElement('section');
+    studentHome.id='studentDashboardHome';
+    studentHome.innerHTML='<article class="panel"><div class="panel-head"><div><h3>My student dashboard</h3><p>Quick access to your college services.</p></div><span class="tag">STUDENT</span></div><div class="quick-grid"><button data-goto="checkin"><b>✓</b><span>Join with attendance code</span></button><button data-goto="timetable"><b>▦</b><span>View timetable</span></button><button data-goto="notices"><b>♢</b><span>View notices</span></button><button data-goto="leave"><b>✉</b><span>Apply for leave</span></button></div></article>';
+    dashboard.appendChild(studentHome);
+    studentHome.querySelectorAll('[data-goto]').forEach(btn=>btn.addEventListener('click',()=>navigate(btn.dataset.goto)));
+   }
+   studentHome.hidden=false;
+  }else if(studentHome){studentHome.hidden=true}
+ }
+ $('[data-goto]').forEach(el=>{el.hidden=!allowed.quick.includes(el.dataset.goto)});
+ const active=$('.view.active');
+ if(!active||!allowed.views.includes(active.id)){
+  $('.view').forEach(el=>el.classList.toggle('active',el.id==='dashboard'));
+  $('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view==='dashboard'));
+  $('#pageTitle').textContent='Dashboard';
+ }
+ $('#welcomeRole').textContent=current==='Admin'?'Admin Demo':current==='Teacher'?'Teacher Demo':'Student Demo';
+ $('#avatar').textContent=current==='Admin'?'AD':current==='Teacher'?'TR':'ST';
+}
 $$('.nav-item').forEach(b=>b.onclick=()=>navigate(b.dataset.view));$$('[data-goto]').forEach(b=>b.onclick=()=>navigate(b.dataset.goto));
-$('#roleSelect').onchange=()=>{$('#welcomeRole').textContent=role();$('#avatar').textContent=role()==='Admin'?'AD':role()==='Teacher'?'TR':'ST';renderAll();toast('Viewing '+role()+' demo workspace')};
+$('#roleSelect').onchange=()=>{renderAll();applyRolePermissions();toast('Viewing '+role()+' demo workspace')};
 function stat(){let today=records.filter(r=>r.date==='2026-11-18'),present=today.filter(r=>r.status==='Present').length;$('#totalStudents').textContent=students.length.toLocaleString();$('#presentToday').textContent=present||Math.round(students.length*.87);$('#absentToday').textContent=today.length?today.length-present:Math.round(students.length*.13);$('#presentPercent').textContent=(today.length?Math.round(present/today.length*100):87)+'% attendance';let depts=departments.map(d=>{let rs=today.filter(r=>r.dept===d);return [d,rs.length?Math.round(rs.filter(r=>r.status==='Present').length/rs.length*100):[91,86,88,82,89][departments.indexOf(d)]]});$('#departmentBars').innerHTML=depts.map(([d,p])=>`<div class="bar-row"><span>${d}</span><div class="bar-track"><div class="bar-fill" style="width:${p}%"></div></div><span class="bar-value">${p}%</span></div>`).join('');let recent=(records.length?records.slice(-5).reverse():students.slice(0,5).map(s=>({...s,date:'18 Nov 2026',status:'Present'})));$('#recentRows').innerHTML=recent.map(r=>`<tr><td><b>${esc(r.name)}</b></td><td>${esc(r.dept)}</td><td>${esc(r.year)}</td><td>${r.date}</td><td>${badge(r.status)}</td></tr>`).join('')}
 function badge(s){return `<span class="status ${s.toLowerCase()}">${s}</span>`}function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function roster(){let d=$('#attDept').value,y=$('#attYear').value,sec=$('#attSection').value,date=$('#attDate').value,q=$('#studentSearch').value.toLowerCase();let list=students.filter(s=>s.dept===d&&s.year===y&&s.section===sec&&(`${s.name} ${s.roll}`).toLowerCase().includes(q));$('#rosterCount').textContent=`${list.length} students · ${date}`;$('#rosterRows').innerHTML=list.map(s=>{let r=records.find(x=>x.roll===s.roll&&x.date===date);return `<tr><td>${s.roll}</td><td><b>${esc(s.name)}</b></td><td>${s.dept}</td><td>${s.year} · ${s.section}</td><td><select class="attendance-select" data-roll="${s.roll}"><option ${(!r||r.status==='Present')?'selected':''}>Present</option><option ${r?.status==='Absent'?'selected':''}>Absent</option><option ${r?.status==='Late'?'selected':''}>Late</option></select></td></tr>`}).join('')||'<tr><td colspan="5">No students match these filters. Try another year, section or department.</td></tr>'}
@@ -33,6 +70,7 @@ $('#newLeaveBtn').onclick=()=>openModal('Apply for leave',`<form><label>Student 
 $('#exportCsv').onclick=()=>{let rows=[['Roll','Name','Department','Year','Date','Status'],...records.map(r=>[r.roll,r.name,r.dept,r.year,r.date,r.status])];let csv=rows.map(r=>r.map(x=>'"'+String(x??'').replaceAll('"','""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='MITS-attendance-report.csv';a.click();URL.revokeObjectURL(a.href)};
 $('#resetDemo').onclick=()=>{if(confirm('Reset all MITS demo data in this browser?')){['students','records','notices','leaves'].forEach(k=>localStorage.removeItem('mits_'+k));location.reload()}};
 renderAll();
+applyRolePermissions();
 
 
 /* MITS opening screen actions — one delegated click handler */
@@ -141,45 +179,4 @@ document.addEventListener('click',function(event){
   }catch(err){msg(feedback,err.message||'Could not submit attendance');}
   finally{btn.disabled=false;btn.textContent='Submit attendance';}
  },true);
-})();
-
-
-/* Strictly separate Student, Teacher and Admin workspaces (demo mode). */
-(function(){
- const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
- const permissions={
-  Student:{views:["dashboard","checkin","timetable","notices","leave"],quick:["checkin","notices","leave","timetable"]},
-  Teacher:{views:["dashboard","attendance","teacherCode","students","reports","leave"],quick:["teacherCode","attendance","students","reports","leave"]},
-  Admin:{views:["dashboard","attendance","teacherCode","checkin","students","reports","timetable","notices","leave"],quick:["attendance","teacherCode","checkin","students","reports","notices","leave","timetable"]}
- };
- function applyRole(){
-  const current=$("#roleSelect")?.value||"Student",allowed=permissions[current]||permissions.Student;
-  $$(".nav-item").forEach(item=>{item.hidden=!allowed.views.includes(item.dataset.view)});
-  $$("[data-goto]").forEach(item=>{item.hidden=!allowed.quick.includes(item.dataset.goto)});
-  const dashboard=$("#dashboard");
-  if(dashboard){
-   const stats=dashboard.querySelector(".stats"),analytics=dashboard.querySelector(".grid-two"),activity=dashboard.querySelector(":scope > .panel");
-   if(current==="Student"){
-    if(stats)stats.hidden=true;if(analytics)analytics.hidden=true;if(activity)activity.hidden=true;
-    let home=$("#studentDashboardHome");
-    if(!home){
-     home=document.createElement("section");home.id="studentDashboardHome";
-     home.innerHTML='<article class="panel" style="margin-top:18px"><div class="panel-head"><div><h3>Student services</h3><p>Your attendance and campus information.</p></div><span class="tag">STUDENT</span></div><div class="quick-grid"><button data-goto="checkin"><b>✓</b><span>Submit attendance with teacher code</span></button><button data-goto="notices"><b>♢</b><span>View college notices</span></button><button data-goto="leave"><b>✉</b><span>Apply for leave</span></button><button data-goto="timetable"><b>▦</b><span>View timetable</span></button></div></article>';
-     dashboard.appendChild(home);
-     home.querySelectorAll("[data-goto]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.goto)));
-    }
-    home.hidden=false;
-   }else{
-    if(stats)stats.hidden=false;if(analytics)analytics.hidden=false;if(activity)activity.hidden=false;
-    const home=$("#studentDashboardHome");if(home)home.hidden=true;
-   }
-  }
-  const active=$(".view.active");
-  if(active&&!allowed.views.includes(active.id))navigate("dashboard");
-  // Hide dashboard quick-action links not assigned to the selected role.
-  $$("[data-goto]").forEach(item=>{if(!item.closest("#studentDashboardHome"))item.hidden=!allowed.quick.includes(item.dataset.goto)});
- }
- const select=$("#roleSelect");
- if(select){select.addEventListener("change",applyRole);applyRole();}
- window.mitsApplyRolePermissions=applyRole;
 })();
