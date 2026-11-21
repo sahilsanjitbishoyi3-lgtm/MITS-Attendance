@@ -164,7 +164,7 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 </main></div>
 <div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">Add record</h3><button id="closeModal" class="close">×</button></div><div id="modalBody"></div></div></div>
 <div id="toast" class="toast"></div>
-<script src="script.js?v=localdemo4"></script>
+<script src="script.js?v=localdemo5"></script>
 
 <script>
 /* Direct button action avoids conflicts with older delegated login/signup handlers. */
@@ -232,6 +232,39 @@ window.mitsOpenDashboard = function (selectedRole, event) {
   if(picker)picker.addEventListener('change',enforceRoleMenu);
   enforceRoleMenu();
   window.addEventListener('pageshow',enforceRoleMenu);
+})();
+</script>
+<script>
+/* Final role-based navigation guard for the local demo. */
+(function(){
+ const permissions={
+  Student:['dashboard','checkin','studentReport','timetable','notices','leave'],
+  Teacher:['dashboard','attendance','teacherCode','students','reports','notices','leave'],
+  Admin:['dashboard','attendance','teacherCode','checkin','studentReport','students','reports','timetable','notices','leave']
+ };
+ function applyMitsRole(){
+  const picker=document.getElementById('roleSelect');
+  const current=(picker&&permissions[picker.value])?picker.value:'Student';
+  const allowed=permissions[current];
+  document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
+   el.style.setProperty('display',allowed.includes(el.dataset.view)?'flex':'none','important');
+  });
+  document.querySelectorAll('[data-goto]').forEach(el=>{
+   el.style.setProperty('display',allowed.includes(el.dataset.goto)?'':'none','important');
+  });
+  const publish=document.getElementById('addNoticeBtn');
+  if(publish)publish.style.setProperty('display',current==='Student'?'none':'','important');
+  const active=document.querySelector('.view.active');
+  if(active&&!allowed.includes(active.id)){
+   document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='dashboard'));
+   document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.view==='dashboard'));
+   const title=document.getElementById('pageTitle');if(title)title.textContent='Dashboard';
+  }
+ }
+ const picker=document.getElementById('roleSelect');
+ if(picker)picker.addEventListener('change',applyMitsRole);
+ applyMitsRole();
+ window.addEventListener('pageshow',applyMitsRole);
 })();
 </script>
 </body></html>
