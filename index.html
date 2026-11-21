@@ -126,54 +126,36 @@ html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:
 <div id="toast" class="toast"></div>
 <script src="script.js"></script>
 <script>
-/* Independent welcome-screen controls: keeps login/signup usable even if dashboard JS has an error. */
+/* TEMPORARY OPEN DEMO: any role button opens the dashboard directly.
+   No credentials are checked or stored. Use only fictional demo data. */
 (function () {
   const welcome = document.getElementById('portalWelcome');
-  const modal = document.getElementById('modal');
-  const title = document.getElementById('modalTitle');
-  const body = document.getElementById('modalBody');
   const roleSelect = document.getElementById('roleSelect');
-  function showForm(role, mode) {
-    if (!modal || !title || !body) return;
-    const isSignup = mode === 'signup';
-    title.textContent = isSignup
-      ? (role === 'Admin' ? 'Request administrator access' : role + ' sign up')
-      : role + ' login';
-    const identityLabel = role === 'Student' ? 'Email or student roll number' : 'Email address';
-    body.innerHTML = '<form id="welcomeAuthForm" style="display:grid;gap:13px">' +
-      (isSignup ? '<label>Full name<input name="name" required autocomplete="name"></label>' : '') +
-      '<label>' + identityLabel + '<input name="identity" required autocomplete="username"></label>' +
-      (isSignup && role === 'Student' ? '<label>Student roll number<input name="roll" required></label>' : '') +
-      '<label>Password<input name="password" type="password" required minlength="' + (isSignup ? '8' : '1') + '" autocomplete="' + (isSignup ? 'new-password' : 'current-password') + '"></label>' +
-      '<button class="primary" type="submit">' + (isSignup ? (role === 'Admin' ? 'Send access request' : 'Create demo account') : 'Continue to demo') + '</button>' +
-      '<p style="font-size:12px;line-height:1.55;color:#777184;margin:0">Demo preview only. Real accounts and password checks will be enabled after secure Supabase setup. Admin access must be approved privately.</p>' +
-      '</form>';
-    modal.style.zIndex = '10020';
-    modal.classList.add('open');
-    const form = document.getElementById('welcomeAuthForm');
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-      if (isSignup) {
-        alert(role === 'Admin' ? 'Admin access request preview only. No administrator account was created.' : 'Signup preview only. No account was created yet.');
-        modal.classList.remove('open');
-        return;
-      }
-      if (roleSelect) roleSelect.value = role;
-      const welcomeRole = document.getElementById('welcomeRole');
-      const avatar = document.getElementById('avatar');
-      if (welcomeRole) welcomeRole.textContent = role;
-      if (avatar) avatar.textContent = role === 'Admin' ? 'AD' : role === 'Teacher' ? 'TR' : 'ST';
-      modal.classList.remove('open');
-      if (welcome) welcome.style.display = 'none';
-    });
+  function enterDashboard(role) {
+    if (roleSelect) {
+      roleSelect.value = role;
+      roleSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    const welcomeRole = document.getElementById('welcomeRole');
+    const avatar = document.getElementById('avatar');
+    if (welcomeRole) welcomeRole.textContent = role + ' Demo';
+    if (avatar) avatar.textContent = role === 'Admin' ? 'AD' : role === 'Teacher' ? 'TR' : 'ST';
+    if (welcome) welcome.style.display = 'none';
+    let warning = document.getElementById('mitsOpenDemoWarning');
+    if (!warning) {
+      warning = document.createElement('div');
+      warning.id = 'mitsOpenDemoWarning';
+      warning.style.cssText = 'position:sticky;top:0;z-index:9999;padding:10px 14px;background:#fff1cc;color:#704d00;text-align:center;font-size:12px;font-weight:700';
+      warning.textContent = 'OPEN DEMO MODE — login and signup are temporarily bypassed. Do not enter real student data.';
+      document.body.prepend(warning);
+    }
   }
   document.addEventListener('click', function (event) {
     const button = event.target.closest('[data-enter], [data-signup]');
     if (!button) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    const role = button.getAttribute('data-enter') || button.getAttribute('data-signup');
-    showForm(role, button.hasAttribute('data-signup') ? 'signup' : 'login');
+    enterDashboard(button.getAttribute('data-enter') || button.getAttribute('data-signup'));
   }, true);
 })();
 </script>
