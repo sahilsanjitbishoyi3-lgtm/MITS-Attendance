@@ -143,58 +143,42 @@ document.addEventListener('click',function(event){
 })();
 
 
-/* Role-specific navigation and dashboards (demo mode). */
+/* Strictly separate Student, Teacher and Admin workspaces (demo mode). */
 (function(){
  const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
- const rules={
-  Student:{views:["dashboard","checkin","timetable","notices","leave"],quick:["checkin","notices","leave"]},
-  Teacher:{views:["dashboard","attendance","teacherCode","checkin","students","reports","timetable","notices","leave"],quick:["teacherCode","attendance","students","reports","notices"]},
-  Admin:{views:["dashboard","attendance","teacherCode","checkin","students","reports","timetable","notices","leave"],quick:["attendance","teacherCode","checkin","students","reports","notices"]}
+ const permissions={
+  Student:{views:["dashboard","checkin","timetable","notices","leave"],quick:["checkin","notices","leave","timetable"]},
+  Teacher:{views:["dashboard","attendance","teacherCode","students","reports","leave"],quick:["teacherCode","attendance","students","reports","leave"]},
+  Admin:{views:["dashboard","attendance","teacherCode","checkin","students","reports","timetable","notices","leave"],quick:["attendance","teacherCode","checkin","students","reports","notices","leave","timetable"]}
  };
  function applyRole(){
-  const role=$("#roleSelect")?.value||"Student",rule=rules[role]||rules.Student;
-  $$(".nav-item").forEach(b=>{b.hidden=!rule.views.includes(b.dataset.view)});
-  $$("[data-goto]").forEach(b=>{b.hidden=!rule.quick.includes(b.dataset.goto)});
-  // Keep the student home screen focused on student tasks, not college-wide statistics.
+  const current=$("#roleSelect")?.value||"Student",allowed=permissions[current]||permissions.Student;
+  $$(".nav-item").forEach(item=>{item.hidden=!allowed.views.includes(item.dataset.view)});
+  $$("[data-goto]").forEach(item=>{item.hidden=!allowed.quick.includes(item.dataset.goto)});
   const dashboard=$("#dashboard");
   if(dashboard){
-   const stats=dashboard.querySelector(".stats");
-   const analytics=dashboard.querySelector(".grid-two");
-   const activity=dashboard.querySelector(":scope > .panel");
-   if(role==="Student"){
-    if(stats)stats.hidden=true;
-    if(analytics)analytics.hidden=true;
-    if(activity)activity.hidden=true;
-    let studentHome=$("#studentDashboardHome");
-    if(!studentHome){
-     studentHome=document.createElement("section");
-     studentHome.id="studentDashboardHome";
-     studentHome.innerHTML='<article class="panel" style="margin-top:18px"><div class="panel-head"><div><h3>Welcome to your student space</h3><p>Use these student services to stay updated.</p></div><span class="tag">STUDENT</span></div><div class="quick-grid"><button data-goto="checkin"><b>✓</b><span>Submit attendance with teacher code</span></button><button data-goto="notices"><b>♢</b><span>View college notices</span></button><button data-goto="leave"><b>✉</b><span>Apply for leave</span></button><button data-goto="timetable"><b>▦</b><span>View timetable</span></button></div></article>';
-     dashboard.appendChild(studentHome);
-     studentHome.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>{const target=b.dataset.goto;const nav=$('.nav-item[data-view="'+target+'"]');if(nav)nav.click()}));
+   const stats=dashboard.querySelector(".stats"),analytics=dashboard.querySelector(".grid-two"),activity=dashboard.querySelector(":scope > .panel");
+   if(current==="Student"){
+    if(stats)stats.hidden=true;if(analytics)analytics.hidden=true;if(activity)activity.hidden=true;
+    let home=$("#studentDashboardHome");
+    if(!home){
+     home=document.createElement("section");home.id="studentDashboardHome";
+     home.innerHTML='<article class="panel" style="margin-top:18px"><div class="panel-head"><div><h3>Student services</h3><p>Your attendance and campus information.</p></div><span class="tag">STUDENT</span></div><div class="quick-grid"><button data-goto="checkin"><b>✓</b><span>Submit attendance with teacher code</span></button><button data-goto="notices"><b>♢</b><span>View college notices</span></button><button data-goto="leave"><b>✉</b><span>Apply for leave</span></button><button data-goto="timetable"><b>▦</b><span>View timetable</span></button></div></article>';
+     dashboard.appendChild(home);
+     home.querySelectorAll("[data-goto]").forEach(button=>button.addEventListener("click",()=>navigate(button.dataset.goto)));
     }
-    studentHome.hidden=false;
+    home.hidden=false;
    }else{
-    if(stats)stats.hidden=false;
-    if(analytics)analytics.hidden=false;
-    if(activity)activity.hidden=false;
-    const studentHome=$("#studentDashboardHome");if(studentHome)studentHome.hidden=true;
+    if(stats)stats.hidden=false;if(analytics)analytics.hidden=false;if(activity)activity.hidden=false;
+    const home=$("#studentDashboardHome");if(home)home.hidden=true;
    }
   }
-  // If the currently open view is not allowed, return to that role's dashboard.
   const active=$(".view.active");
-  if(active&&!rule.views.includes(active.id)){
-   if(typeof window.mitsNavigate==="function")window.mitsNavigate("dashboard");
-   else{
-    $$(".view").forEach(v=>v.classList.toggle("active",v.id==="dashboard"));
-    $$(".nav-item").forEach(v=>v.classList.toggle("active",v.dataset.view==="dashboard"));
-    $("#pageTitle").textContent="Dashboard";
-   }
-  }
+  if(active&&!allowed.views.includes(active.id))navigate("dashboard");
+  // Hide dashboard quick-action links not assigned to the selected role.
+  $$("[data-goto]").forEach(item=>{if(!item.closest("#studentDashboardHome"))item.hidden=!allowed.quick.includes(item.dataset.goto)});
  }
- const roleSelect=$("#roleSelect");
- if(roleSelect){
-  roleSelect.addEventListener("change",applyRole);
-  applyRole();
- }
+ const select=$("#roleSelect");
+ if(select){select.addEventListener("change",applyRole);applyRole();}
+ window.mitsApplyRolePermissions=applyRole;
 })();
