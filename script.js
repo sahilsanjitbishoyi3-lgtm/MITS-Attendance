@@ -28,7 +28,7 @@ function renderAll(){stat();roster();directory();reports();noticeRender();leaveR
 function openModal(title,html,handler){$('#modalTitle').textContent=title;$('#modalBody').innerHTML=html;$('#modal').classList.add('open');$('#modalBody form').onsubmit=e=>{e.preventDefault();handler(new FormData(e.target));$('#modal').classList.remove('open')}}
 $('#closeModal').onclick=()=>$('#modal').classList.remove('open');$('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').classList.remove('open')};
 $('#addStudentBtn').onclick=()=>openModal('Add student',`<form><label>Student full name<input name="name" required></label><label>Roll number<input name="roll" required></label><label>Department<select name="dept">${departments.map(d=>`<option>${d}</option>`)}</select></label><label>Academic year<select name="year">${['1st Year','2nd Year','3rd Year','4th Year'].map(x=>`<option>${x}</option>`)}</select></label><label>Section<select name="section"><option>A</option><option>B</option><option>C</option></select></label><label>Contact number<input name="phone" inputmode="numeric"></label><button class="primary">Save student</button></form>`,f=>{if(students.some(s=>s.roll===f.get('roll'))){toast('Roll number already exists');return}students.push(Object.fromEntries(['name','roll','dept','year','section','phone'].map(k=>[k,f.get(k)])));save();renderAll();toast('Student added')});
-$('#addNoticeBtn').onclick=()=>openModal('Publish notice',`<form><label>Notice title<input name="title" required></label><label>Message<textarea name="body" required></textarea></label><button class="primary">Publish notice</button></form>`,f=>{notices.push({title:f.get('title'),body:f.get('body'),date:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})});save();noticeRender();toast('Notice published')});
+$('#addNoticeBtn').onclick=()=>{if(role()!=='Teacher'&&role()!=='Admin'){toast('Only teachers and admins can publish notices');return}openModal('Publish notice',`<form><label>Notice title<input name="title" required></label><label>Message<textarea name="body" required></textarea></label><button class="primary">Publish notice</button></form>`,f=>{notices.push({title:f.get('title'),body:f.get('body'),date:new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})});save();noticeRender();toast('Notice published')})};
 $('#newLeaveBtn').onclick=()=>openModal('Apply for leave',`<form><label>Student name<input name="student" required></label><label>From date<input name="from" type="date" required></label><label>To date<input name="to" type="date" required></label><label>Reason<textarea name="reason" required></textarea></label><button class="primary">Submit request</button></form>`,f=>{leaves.push({student:f.get('student'),from:f.get('from'),to:f.get('to'),reason:f.get('reason'),status:'Pending'});save();leaveRender();toast('Leave request submitted')});
 $('#exportCsv').onclick=()=>{let rows=[['Roll','Name','Department','Year','Date','Status'],...records.map(r=>[r.roll,r.name,r.dept,r.year,r.date,r.status])];let csv=rows.map(r=>r.map(x=>'"'+String(x??'').replaceAll('"','""')+'"').join(',')).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='MITS-attendance-report.csv';a.click();URL.revokeObjectURL(a.href)};
 $('#resetDemo').onclick=()=>{if(confirm('Reset all MITS demo data in this browser?')){['students','records','notices','leaves'].forEach(k=>localStorage.removeItem('mits_'+k));location.reload()}};
@@ -101,7 +101,7 @@ document.addEventListener('click',function(event){
 (function(){
  const allowed={
   Student:["dashboard","checkin","timetable","notices","leave"],
-  Teacher:["dashboard","attendance","teacherCode","students","reports","leave"],
+  Teacher:["dashboard","attendance","teacherCode","students","reports","notices","leave"],
   Admin:["dashboard","attendance","teacherCode","checkin","students","reports","timetable","notices","leave"]
  };
  function apply(){
@@ -114,6 +114,8 @@ document.addEventListener('click',function(event){
   document.querySelectorAll('.quick-grid [data-goto], [data-goto].text-btn').forEach(node=>{
    node.style.setProperty('display',views.includes(node.dataset.goto)?'':'none','important');
   });
+  const noticeButton=document.getElementById("addNoticeBtn");
+  if(noticeButton)noticeButton.style.display=(currentRole==="Teacher"||currentRole==="Admin")?"":"none";
   const active=document.querySelector('.view.active');
   if(active&&!views.includes(active.id))navigate('dashboard');
   const dashboard=document.getElementById('dashboard');
