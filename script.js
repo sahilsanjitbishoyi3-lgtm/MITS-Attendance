@@ -182,26 +182,3 @@ document.addEventListener('click',function(event){
  if(select){select.addEventListener("change",applyRole);applyRole();}
  window.mitsApplyRolePermissions=applyRole;
 })();
-
-
-/* Stable role-switch refresh: clear stale hidden states before reapplying permissions.
-   This keeps the Student dashboard service shortcuts visible after repeated role changes. */
-(function(){
-  const roleSelect=document.getElementById('roleSelect');
-  if(!roleSelect || typeof window.mitsApplyRolePermissions!=='function') return;
-  const applyOriginal=window.mitsApplyRolePermissions;
-  function applyRoleWithoutStaleHiddenState(){
-    document.querySelectorAll('.nav-item,[data-goto]').forEach(el=>{el.hidden=false;});
-    const home=document.getElementById('studentDashboardHome');
-    if(home) home.querySelectorAll('[data-goto]').forEach(el=>{el.hidden=false;});
-    applyOriginal();
-    const refreshedHome=document.getElementById('studentDashboardHome');
-    if(refreshedHome){
-      refreshedHome.hidden=roleSelect.value!=='Student';
-      refreshedHome.querySelectorAll('[data-goto]').forEach(el=>{el.hidden=false;});
-    }
-  }
-  roleSelect.addEventListener('change',applyRoleWithoutStaleHiddenState);
-  window.mitsApplyRolePermissions=applyRoleWithoutStaleHiddenState;
-  applyRoleWithoutStaleHiddenState();
-})();
